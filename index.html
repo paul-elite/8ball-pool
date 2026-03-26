@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>8-Ball Pool</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap');
@@ -43,6 +43,44 @@ canvas{display:block;cursor:crosshair;}
 #ov h2{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:5px;color:var(--gold);}
 #ov p{color:var(--dim);font-size:11px;letter-spacing:1px;}
 #rb{font-size:8px;color:var(--dim);line-height:1.9;}
+
+/* Mobile HUD - hidden on desktop */
+#mobile-hud{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:8px 12px 12px;z-index:50;gap:12px;align-items:flex-end;justify-content:space-between;}
+#mobile-hud .mh-power{flex:1;max-width:180px;}
+#mobile-hud .mh-power-label{font-size:7px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+#mobile-hud .mh-power-bar{height:8px;background:#080808;border-radius:4px;border:1px solid var(--border);overflow:hidden;}
+#mobile-hud .mh-power-fill{height:100%;width:0;background:linear-gradient(90deg,#2a7a2a,#c8a84b,#cc2222);transition:width .04s;}
+#mobile-hud .mh-spin{width:56px;height:56px;flex-shrink:0;}
+#mobile-hud .mh-spin canvas{width:56px;height:56px;border-radius:50%;border:1px solid var(--border);}
+#mobile-hud .mh-status{flex:1;max-width:140px;text-align:right;}
+#mobile-hud .mh-turn{font-size:9px;color:var(--gold);margin-bottom:2px;}
+#mobile-hud .mh-foul{font-size:8px;color:var(--danger);}
+#mobile-hud .mh-btn{background:none;border:1px solid var(--border);color:var(--dim);font-family:'DM Mono',monospace;font-size:8px;padding:6px 10px;border-radius:2px;}
+
+/* Mobile landscape styles */
+@media (max-height:480px) and (orientation:landscape),(max-width:900px) and (max-height:500px){
+  #header{padding:4px 10px;}
+  #header h1{font-size:18px;letter-spacing:2px;}
+  .ps .l{font-size:7px;}
+  .ps .p{font-size:16px;}
+  .ps .g{font-size:7px;}
+  #sb{display:none;}
+  #cw{padding:4px;}
+  #mobile-hud{display:flex;}
+  #ov h2{font-size:36px;}
+  #ov p{font-size:10px;}
+  .btn{font-size:8px;padding:6px 8px;}
+}
+
+/* Very small screens */
+@media (max-height:380px){
+  #header{padding:2px 8px;}
+  #header h1{font-size:14px;}
+  .ps .p{font-size:14px;}
+  #mobile-hud{padding:4px 8px 8px;}
+  #mobile-hud .mh-spin{width:44px;height:44px;}
+  #mobile-hud .mh-spin canvas{width:44px;height:44px;}
+}
 </style>
 </head>
 <body>
@@ -70,6 +108,11 @@ canvas{display:block;cursor:crosshair;}
   </div>
 </div>
 <div id="ov"><h2 id="ot">8-Ball Pool</h2><p id="os">UK Rules · Hot Seat</p><button class="btn pr" id="bs" style="width:140px;padding:10px">Start Game</button></div>
+<div id="mobile-hud">
+  <div class="mh-power"><div class="mh-power-label">Power</div><div class="mh-power-bar"><div class="mh-power-fill" id="mpb"></div></div></div>
+  <div class="mh-spin"><canvas id="msc" width="56" height="56"></canvas></div>
+  <div class="mh-status"><div class="mh-turn" id="mturn">—</div><div class="mh-foul" id="mfoul"></div></div>
+</div>
 
 <script>
 // ════════════════════════════════════════════════════════════
@@ -742,8 +785,8 @@ function drawPlacing(){
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillText('CUE',p.x,p.y);
 }
 
-function drawSpin(){
-  const el=document.getElementById('sc'),sctx=el.getContext('2d');
+function drawSpinOn(el){
+  const sctx=el.getContext('2d');
   const w=el.width,h=el.height,cx=w/2,cy=h/2,r=cx-4;
   sctx.clearRect(0,0,w,h);
   const g=sctx.createRadialGradient(cx-r*.3,cy-r*.3,r*.05,cx,cy,r);
@@ -753,9 +796,14 @@ function drawSpin(){
   sctx.strokeStyle='rgba(0,0,0,.1)';sctx.lineWidth=.5;
   sctx.beginPath();sctx.moveTo(cx,cy-r);sctx.lineTo(cx,cy+r);sctx.stroke();
   sctx.beginPath();sctx.moveTo(cx-r,cy);sctx.lineTo(cx+r,cy);sctx.stroke();
+  const dotR=Math.max(3,r*.15);
   const ddx=spinX*r*.72,ddy=spinY*r*.72;
-  sctx.beginPath();sctx.arc(cx+ddx,cy+ddy,5.5,0,Math.PI*2);
+  sctx.beginPath();sctx.arc(cx+ddx,cy+ddy,dotR,0,Math.PI*2);
   sctx.fillStyle='#c8a84b';sctx.fill();sctx.strokeStyle='#6b4a10';sctx.lineWidth=1.5;sctx.stroke();
+}
+function drawSpin(){
+  drawSpinOn(document.getElementById('sc'));
+  const msc=document.getElementById('msc');if(msc)drawSpinOn(msc);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -770,8 +818,16 @@ function updateUI(){
   document.getElementById('sm').textContent=turnMsg;
   document.getElementById('fm').textContent=foulMsg;
   document.getElementById('xi').textContent=extraMsg||(phase==='placing'?(freeBall?'Free ball — place anywhere':'Place cue ball in D'):'');
+  // Mobile HUD
+  const mt=document.getElementById('mturn'),mf=document.getElementById('mfoul');
+  if(mt)mt.textContent=turnMsg;
+  if(mf)mf.textContent=foulMsg;
 }
-function updPow(){document.getElementById('pb').style.width=power+'%';document.getElementById('pv').textContent=Math.round(power)+'%';}
+function updPow(){
+  document.getElementById('pb').style.width=power+'%';
+  document.getElementById('pv').textContent=Math.round(power)+'%';
+  const mpb=document.getElementById('mpb');if(mpb)mpb.style.width=power+'%';
+}
 function updateTrays(){
   const st=document.getElementById('str'),stt=document.getElementById('sttr');
   st.innerHTML='';stt.innerHTML='';
@@ -790,8 +846,7 @@ function updateTrays(){
 // ════════════════════════════════════════════════════════════
 //  INPUT
 // ════════════════════════════════════════════════════════════
-canvas.addEventListener('mousemove',e=>{
-  const r=canvas.getBoundingClientRect(),sx=e.clientX-r.left,sy=e.clientY-r.top;
+function handlePointerMove(sx,sy){
   if(phase==='aiming'&&cueBall&&cueBall.onTable){
     const p=tc(cueBall.x,cueBall.y);aimAngle=Math.atan2(sy-p.y,sx-p.x);}
   if(phase==='placing'&&cueBall){
@@ -804,8 +859,8 @@ canvas.addEventListener('mousemove',e=>{
       cueBall.x=Math.max(BR,Math.min(BAULK_X-BR,tx));cueBall.y=ty;
     }
   }
-});
-canvas.addEventListener('mousedown',()=>{
+}
+function handlePointerDown(){
   getAC();
   if(phase==='aiming')charging=true;
   if(phase==='placing'){
@@ -814,20 +869,61 @@ canvas.addEventListener('mousedown',()=>{
     turnMsg=`Player ${curP+1} — pot ${openTable?'any ball':ne?'8-ball':`${mg}s`}`;
     extraMsg='';updateUI();
   }
-});
-canvas.addEventListener('mouseup',()=>{if(charging){charging=false;shoot();}});
-canvas.addEventListener('mouseleave',()=>{if(charging){charging=false;shoot();}});
+}
+function handlePointerUp(){if(charging){charging=false;shoot();}}
 
-const scEl=document.getElementById('sc');let spinDrag=false;
-scEl.addEventListener('mousedown',e=>{spinDrag=true;setSpin(e);});
-window.addEventListener('mousemove',e=>{if(spinDrag)setSpin(e);});
-window.addEventListener('mouseup',()=>spinDrag=false);
-function setSpin(e){
-  const r=scEl.getBoundingClientRect(),cx=scEl.width/2,cy=scEl.height/2,rad=cx-4;
-  let ddx=(e.clientX-r.left)-cx,ddy=(e.clientY-r.top)-cy;
+canvas.addEventListener('mousemove',e=>{
+  const r=canvas.getBoundingClientRect();
+  handlePointerMove(e.clientX-r.left,e.clientY-r.top);
+});
+canvas.addEventListener('mousedown',handlePointerDown);
+canvas.addEventListener('mouseup',handlePointerUp);
+canvas.addEventListener('mouseleave',handlePointerUp);
+
+// Touch support for canvas
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const t=e.touches[0],r=canvas.getBoundingClientRect();
+  handlePointerMove(t.clientX-r.left,t.clientY-r.top);
+  handlePointerDown();
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const t=e.touches[0],r=canvas.getBoundingClientRect();
+  handlePointerMove(t.clientX-r.left,t.clientY-r.top);
+},{passive:false});
+canvas.addEventListener('touchend',e=>{e.preventDefault();handlePointerUp();},{passive:false});
+canvas.addEventListener('touchcancel',e=>{e.preventDefault();handlePointerUp();},{passive:false});
+
+let spinDrag=false,spinDragEl=null;
+function setSpinFromEl(el,clientX,clientY){
+  const r=el.getBoundingClientRect();
+  const cx=el.width/2,cy=el.height/2,rad=cx-4;
+  // Scale client coords to canvas coords
+  const scaleX=el.width/r.width,scaleY=el.height/r.height;
+  let ddx=((clientX-r.left)*scaleX)-cx;
+  let ddy=((clientY-r.top)*scaleY)-cy;
   const d=Math.hypot(ddx,ddy);if(d>rad){ddx=ddx/d*rad;ddy=ddy/d*rad;}
   spinX=ddx/rad;spinY=ddy/rad;drawSpin();
 }
+function setupSpinControl(el){
+  el.addEventListener('mousedown',e=>{spinDrag=true;spinDragEl=el;setSpinFromEl(el,e.clientX,e.clientY);});
+  el.addEventListener('touchstart',e=>{
+    e.preventDefault();spinDrag=true;spinDragEl=el;
+    const t=e.touches[0];setSpinFromEl(el,t.clientX,t.clientY);
+  },{passive:false});
+  el.addEventListener('touchmove',e=>{
+    e.preventDefault();if(spinDrag&&spinDragEl===el){
+      const t=e.touches[0];setSpinFromEl(el,t.clientX,t.clientY);
+    }
+  },{passive:false});
+  el.addEventListener('touchend',e=>{e.preventDefault();spinDrag=false;spinDragEl=null;},{passive:false});
+}
+const scEl=document.getElementById('sc');
+setupSpinControl(scEl);
+const mscEl=document.getElementById('msc');if(mscEl)setupSpinControl(mscEl);
+window.addEventListener('mousemove',e=>{if(spinDrag&&spinDragEl)setSpinFromEl(spinDragEl,e.clientX,e.clientY);});
+window.addEventListener('mouseup',()=>{spinDrag=false;spinDragEl=null;});
 function chargePwr(){if(!charging)return;power=Math.min(100,power+1.6);updPow();}
 
 // ════════════════════════════════════════════════════════════
