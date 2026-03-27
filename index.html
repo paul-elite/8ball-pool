@@ -270,7 +270,7 @@ const tc=(x,y)=>({x:(RAIL+CUSHION+x)*S(),y:(RAIL+CUSHION+y)*S()});
 const ct=(x,y)=>({x:x/S()-RAIL-CUSHION,y:y/S()-RAIL-CUSHION});
 
 // Physics
-const P={mu_r:0.012,mu_s:0.15,e_cush:0.82,mu_cush:0.25,e_ball:0.96,mu_ball:0.04,g:1.0,R:BR,I:0.4*BR*BR,MIN_V:0.06,MIN_W:0.004,NOISE:0.00004,SUBS:8,DT:0.016};
+const P={mu_r:0.012,mu_s:0.15,e_cush:0.82,mu_cush:0.25,e_ball:0.96,mu_ball:0.04,g:1.0,R:BR,I:0.4*BR*BR,MIN_V:0.06,MIN_W:0.004,NOISE:0.00004,SUBS:8,DT:0.016*0.78};
 
 // Game State
 let balls=[],cueBall=null,uid=0;
