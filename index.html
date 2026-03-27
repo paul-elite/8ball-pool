@@ -1270,7 +1270,7 @@ canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0]
 canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=canvas.getBoundingClientRect();handlePointerMove(t.clientX-r.left,t.clientY-r.top);},{passive:false});
 canvas.addEventListener('touchend',e=>{e.preventDefault();handlePointerUp();},{passive:false});
 
-function chargePwr(){if(!charging)return;power=Math.min(100,power+1.8);updPow();}
+function chargePwr(){if(!charging)return;power=Math.min(100,power+0.7);updPow();}
 
 // AI (simplified for brevity)
 function getValidTargets(){
