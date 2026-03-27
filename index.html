@@ -1087,14 +1087,14 @@ function aiUpdate(){
   if(!aiThinking){aiThinking=true;aiDelay=30;aiState='idle';turnMsg='CPU thinking...';updateUI();}
   
   if(phase==='placing'){
-    if(aiDelay-->0) return;
+    aiDelay--; if(aiDelay>0) return;
     cueBall.x=BAULK_X;cueBall.y=TH*.5;
     phase='aiming';foulMsg='';turnMsg='CPU aiming...';updateUI();
     aiDelay=20;return;
   }
   
   if(aiState==='idle'){
-    if(aiDelay-->0) return;
+    aiDelay--; if(aiDelay>0) return;
     const shot=findBestShot();
     if(shot){aiTargetAngle=shot.angle;aiTargetPower=shot.power;}
     else{aiTargetAngle=Math.random()*Math.PI*2;aiTargetPower=40;}
