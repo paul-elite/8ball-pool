@@ -704,6 +704,7 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   const surfaceY=(rawX*Math.sin(rotY*0.5)+rawY*Math.cos(rotY*0.5))*r*0.5;
   const visible=surfaceZ>0;
   const scale=0.55+surfaceZ*0.45;
+  const circleR=r*.38*scale;
 
   if(stripe){
     // White base
@@ -715,8 +716,8 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
     ctx.rotate(rotY);
     // Calculate stripe offset based on X rotation (tilt)
     const stripeOffset=Math.sin(rotX)*r*0.5;
-    // Constant stripe width for a more solid, realistic look
-    const stripeWidth=r*0.7;
+    // Tie the thickness directly to the ball number's scaled circle radius
+    const stripeWidth=circleR*1.85;
     ctx.fillStyle=color;
     ctx.fillRect(-r*1.2,stripeOffset-stripeWidth/2,r*2.4,stripeWidth);
     ctx.restore();
@@ -740,7 +741,6 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   if(num>0&&visible){
     const numX=px+surfaceX,numY=py+surfaceY;
     const fs=Math.max(8,Math.round(r*.85*scale));
-    const circleR=r*.38*scale;
     const alpha=Math.min(1,surfaceZ*1.4);
     ctx.beginPath();ctx.arc(numX,numY,circleR,0,Math.PI*2);
     ctx.fillStyle=`rgba(255,255,255,${alpha*.9})`;ctx.fill();
