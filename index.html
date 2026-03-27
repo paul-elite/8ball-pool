@@ -710,23 +710,38 @@ function drawTable(){
   });
 }
 
-function drawBallAt(px,py,color,stripe,r,num){
-  // Soft shadow
-  const sg=ctx.createRadialGradient(px+r*.18,py+r*.18,0,px+r*.18,py+r*.18,r*1.25);
+function drawBallAt(px,py,color,stripe,r,num,lx,ly){
+  // Calculate light direction and intensity
+  const dx=lx-px,dy=ly-py;
+  const dist=Math.hypot(dx,dy);
+  const lightInt=Math.max(0.3,Math.min(1,1-dist/(canvas.width*0.8)));
+  const nx=dx/(dist||1),ny=dy/(dist||1);
+  const hlx=px+nx*r*0.35,hly=py+ny*r*0.35;
+
+  // Shadow opposite to light
+  const shx=px-nx*r*.2,shy=py-ny*r*.2;
+  const sg=ctx.createRadialGradient(shx,shy,0,shx,shy,r*1.25);
   sg.addColorStop(0,'rgba(0,0,0,.48)');sg.addColorStop(.5,'rgba(10,5,0,.22)');sg.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.beginPath();ctx.arc(px+r*.18,py+r*.18,r*1.25,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+  ctx.beginPath();ctx.arc(shx,shy,r*1.25,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
 
   ctx.save();ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.clip();
   if(stripe){
     ctx.fillStyle='#f0ece0';ctx.fillRect(px-r,py-r,r*2,r*2);
     ctx.fillStyle=color;ctx.fillRect(px-r,py-r*.44,r*2,r*.88);
   } else {
-    const g=ctx.createRadialGradient(px-r*.28,py-r*.3,r*.04,px,py,r);
-    g.addColorStop(0,lc(color,55));g.addColorStop(.45,color);g.addColorStop(1,dc(color,38));
+    const g=ctx.createRadialGradient(hlx,hly,r*.04,px,py,r);
+    g.addColorStop(0,lc(color,Math.round(55*lightInt)));
+    g.addColorStop(.45,color);
+    g.addColorStop(1,dc(color,Math.round(38+20*(1-lightInt))));
     ctx.fillStyle=g;ctx.fillRect(px-r,py-r,r*2,r*2);
   }
-  ctx.beginPath();ctx.arc(px-r*.28,py-r*.3,r*.2,0,Math.PI*2);
-  ctx.fillStyle='rgba(255,255,255,.52)';ctx.fill();
+  // Dynamic highlight based on light position
+  const hlAlpha=(0.35+0.25*lightInt).toFixed(2);
+  ctx.beginPath();ctx.arc(hlx,hly,r*.22,0,Math.PI*2);
+  ctx.fillStyle=`rgba(255,255,220,${hlAlpha})`;ctx.fill();
+  // Secondary softer highlight
+  ctx.beginPath();ctx.arc(hlx-nx*r*.1,hly-ny*r*.1,r*.12,0,Math.PI*2);
+  ctx.fillStyle=`rgba(255,255,255,${(lightInt*0.5).toFixed(2)})`;ctx.fill();
   ctx.restore();
   if(num>0){
     const fs=Math.max(6,Math.round(r*.64));
@@ -742,11 +757,13 @@ function drawBallAt(px,py,color,stripe,r,num){
 
 function drawAllBalls(){
   const s=S(),r=BR*s;
+  const bx=(RAIL+CUSHION)*s,by=(RAIL+CUSHION)*s,bw=TW*s,bh=TH*s;
+  const lampX=bx+bw*.5,lampY=by+bh*.38;
   for(const b of balls){
     if(!b.onTable)continue;
     const p=tc(b.x,b.y);
     const col=b.type==='cue'?'#f5f0e8':b.type==='eight'?'#111':BALL_COLORS[b.cIdx];
-    drawBallAt(p.x,p.y,col,b.stripe,r,b.num);
+    drawBallAt(p.x,p.y,col,b.stripe,r,b.num,lampX,lampY);
   }
 }
 
