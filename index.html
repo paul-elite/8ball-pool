@@ -664,17 +664,32 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
 
   const cosX=Math.cos(rotX),sinX=Math.sin(rotX);
   const cosY=Math.cos(rotY),sinY=Math.sin(rotY);
+  // 3D sphere point projection for number position
   const surfaceZ=cosX*cosY;
-  const surfaceX=sinY*r*0.55;
-  const surfaceY=-sinX*r*0.55;
+  // Number position rotates with the ball in both axes
+  const rawX=sinY*cosX;
+  const rawY=-sinX;
+  // Apply rotation to sync with stripe
+  const surfaceX=(rawX*Math.cos(rotY*0.5)-rawY*Math.sin(rotY*0.5))*r*0.5;
+  const surfaceY=(rawX*Math.sin(rotY*0.5)+rawY*Math.cos(rotY*0.5))*r*0.5;
   const visible=surfaceZ>0;
-  const scale=0.6+surfaceZ*0.4;
+  const scale=0.55+surfaceZ*0.45;
 
   if(stripe){
+    // White base
     ctx.fillStyle='#f8f4e8';ctx.fillRect(px-r,py-r,r*2,r*2);
+    // Rotating stripe band - synced with ball rotation
+    ctx.save();
+    ctx.translate(px,py);
+    // Rotate based on ball's Y rotation (rolling direction)
+    ctx.rotate(rotY);
+    // Calculate stripe offset based on X rotation (tilt)
+    const stripeOffset=Math.sin(rotX)*r*0.5;
+    // Scale stripe width based on viewing angle
+    const stripeWidth=r*0.7*Math.max(0.3,Math.abs(Math.cos(rotX)));
     ctx.fillStyle=color;
-    const stripeY=surfaceY;
-    ctx.fillRect(px-r,py+stripeY-r*.35,r*2,r*.7);
+    ctx.fillRect(-r*1.2,stripeOffset-stripeWidth/2,r*2.4,stripeWidth);
+    ctx.restore();
   }else{
     const g=ctx.createRadialGradient(hlx,hly,r*.05,px,py,r);
     g.addColorStop(0,lc(color,60));g.addColorStop(.5,color);g.addColorStop(1,dc(color,40));
