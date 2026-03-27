@@ -120,7 +120,7 @@ canvas{display:block;cursor:crosshair;}
 // ════════════════════════════════════════════════════════════
 const TW=880,TH=440,CUSHION=36,RAIL=18;
 const TOTAL_W=TW+CUSHION*2+RAIL*2, TOTAL_H=TH+CUSHION*2+RAIL*2;
-const BR=11, POCKET_R=20, MAX_POWER=1500;
+const BR=11, POCKET_R=20, MAX_POWER=1350;
 const BAULK_X=TW*0.2, D_RADIUS=TH*0.185;
 const POCKETS=[{x:0,y:0},{x:TW/2,y:-2},{x:TW,y:0},{x:0,y:TH},{x:TW/2,y:TH+2},{x:TW,y:TH}];
 const BALL_COLORS=['#e8c830','#1a4acc','#cc2222','#7a1aaa','#cc5500','#1a8a2a','#8a2020'];
@@ -943,7 +943,7 @@ function loop(){
   requestAnimationFrame(loop);
   chargePwr();
   if(phase==='rolling'){
-    for(let i=0;i<10;i++){step();if(!isMoving())break;}
+    for(let i=0;i<9;i++){step();if(!isMoving())break;}
     if(!isMoving())phase='done';
   } else if(phase==='done'){
     afterShot();
