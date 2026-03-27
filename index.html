@@ -715,8 +715,8 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
     ctx.rotate(rotY);
     // Calculate stripe offset based on X rotation (tilt)
     const stripeOffset=Math.sin(rotX)*r*0.5;
-    // Scale stripe width based on viewing angle
-    const stripeWidth=r*0.7*Math.max(0.3,Math.abs(Math.cos(rotX)));
+    // Constant stripe width for a more solid, realistic look
+    const stripeWidth=r*0.7;
     ctx.fillStyle=color;
     ctx.fillRect(-r*1.2,stripeOffset-stripeWidth/2,r*2.4,stripeWidth);
     ctx.restore();
