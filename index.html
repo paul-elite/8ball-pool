@@ -83,10 +83,11 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 /* Ball Tray Row */
 #ball-tray-row{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;margin-top:4px;}
 .ball-tray{display:flex;gap:6px;}
-.ball-slot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+.ball-slot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;position:relative;overflow:hidden;}
 .ball-slot.filled{border-color:transparent;}
-.ball-slot.solid{background:var(--ball-color);}
-.ball-slot.stripe{background:linear-gradient(180deg,#f0ece0 25%,var(--ball-color) 25%,var(--ball-color) 75%,#f0ece0 75%);}
+.ball-slot.solid{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.4),var(--ball-color) 50%,rgba(0,0,0,0.3));box-shadow:inset 0 2px 4px rgba(255,255,255,0.3),inset 0 -2px 4px rgba(0,0,0,0.4);}
+.ball-slot.stripe{background:linear-gradient(180deg,#f0ece0 25%,var(--ball-color) 25%,var(--ball-color) 75%,#f0ece0 75%);box-shadow:inset 0 2px 4px rgba(255,255,255,0.3),inset 0 -2px 4px rgba(0,0,0,0.4);}
+.ball-slot.solid::after,.ball-slot.stripe::after{content:'';position:absolute;top:2px;left:4px;width:8px;height:6px;background:radial-gradient(ellipse,rgba(255,255,255,0.5),transparent);border-radius:50%;pointer-events:none;}
 #status-text{font-size:14px;color:var(--text);font-weight:600;text-align:center;flex:1;}
 
 /* Game Area */
@@ -317,7 +318,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 <div id="event-overlay"></div>
 
 <script>
-const BALL_COLORS=['#f4c430','#1a4acc','#cc2222','#7a1aaa','#ff6600','#1a8a2a','#8a2020'];
+const BALL_COLORS=['#d4a017','#1a4acc','#cc2222','#7a1aaa','#ff6600','#1a8a2a','#8a2020'];
 const TW=880,TH=440,CUSHION=36,RAIL=18;
 const TOTAL_W=TW+CUSHION*2+RAIL*2, TOTAL_H=TH+CUSHION*2+RAIL*2;
 const BR=12, POCKET_R=22, MAX_POWER=1148;
