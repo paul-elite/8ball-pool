@@ -816,37 +816,6 @@ function generateTableCache() {
     tCtx.strokeStyle=lipGrad;
     tCtx.stroke();
     
-    // Green rubber bumper nubs around the pocket mouth
-    // Determine which edges this pocket is near and draw small cushion guides
-    const isLeft = pk.x < TW*0.25;
-    const isRight = pk.x > TW*0.75;
-    const isTop = pk.y < TH*0.25;
-    const isBot = pk.y > TH*0.75;
-    const isMid = !isLeft && !isRight;
-    
-    const nubR = pr*0.35;
-    const nubDist = pr*1.35;
-    tCtx.fillStyle='#1a6030';
-    
-    if(isTop || isBot){
-      const dir = isTop ? -1 : 1;
-      // Left nub
-      if(!isMid || true){
-        const nx = p.x - nubDist*0.7, ny = p.y + dir*nubDist*0.3;
-        tCtx.beginPath();tCtx.arc(nx,ny,nubR,0,Math.PI*2);
-        const ng = tCtx.createRadialGradient(nx-nubR*0.3,ny-nubR*0.3,0,nx,ny,nubR);
-        ng.addColorStop(0,'#2a8848');ng.addColorStop(1,'#145828');
-        tCtx.fillStyle=ng;tCtx.fill();
-      }
-      // Right nub
-      if(!isMid || true){
-        const nx = p.x + nubDist*0.7, ny = p.y + dir*nubDist*0.3;
-        tCtx.beginPath();tCtx.arc(nx,ny,nubR,0,Math.PI*2);
-        const ng = tCtx.createRadialGradient(nx-nubR*0.3,ny-nubR*0.3,0,nx,ny,nubR);
-        ng.addColorStop(0,'#2a8848');ng.addColorStop(1,'#145828');
-        tCtx.fillStyle=ng;tCtx.fill();
-      }
-    }
   });
 }
 
