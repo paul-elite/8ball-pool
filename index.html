@@ -217,6 +217,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
     <button class="icon-btn" title="Sound"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></button>
     <button class="icon-btn" title="Music"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></button>
     <button class="icon-btn" id="bskip" title="Skip CPU or Simulation"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></button>
+    <button class="icon-btn" id="breplay" title="Replay Last Shot"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></button>
     <button class="icon-btn" id="bng" title="New Game"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
     <span id="controls-label"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.73 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Controls</span>
   </div>
@@ -313,6 +314,7 @@ let freeBall=false,power=0,charging=false,aimAngle=0,spinX=0,spinY=0;
 let gameTime=0,timerInterval=null,rollFrames=0;
 let aiTargetAngle=0,aiTargetPower=0,aiState='idle';
 let playerStreaks=[0,0];
+var replayFrames=[], replayPlaying=false, replayIdx=0, replayPrePhase='';
 
 function showStreak(count, pIdx) {
   if (count === 0) {
@@ -365,7 +367,7 @@ function setupGame(){
   uid=0;balls=[];pottedShot=[];firstHit=null;allPotted=[];
   groups=[null,null];openTable=true;freeBall=false;foulMsg='';
   aiThinking=false;aiDelay=0;aiState='idle';rollFrames=0;
-  playerStreaks=[0,0];
+  playerStreaks=[0,0];replayFrames=[];replayPlaying=false;
   document.querySelectorAll('.player-bar-fill').forEach(el=>el.style.width='0%');
   cueBall=mkBall('cue',0,-1,false,BAULK_X,TH*.5);
   balls.push(cueBall);
@@ -582,6 +584,9 @@ function shoot(){
   cueBall.sliding=true;
   firstHit=null;pottedShot=[];
   phase='rolling';power=0;rollFrames=0;updPow();
+  replayFrames=[];
+  // Record initial frame
+  replayFrames.push(balls.map(b=>({x:b.x,y:b.y,onTable:b.onTable,rotX:b.rotX,rotY:b.rotY,type:b.type,num:b.num,cIdx:b.cIdx,stripe:b.stripe})));
   snd_strike(pct);
 }
 
@@ -1284,11 +1289,44 @@ function loop(){
   chargePwr();aiUpdate();
   if(phase==='rolling'){
     rollFrames++;
-    if(rollFrames>420) fastForward(); // 7 second max simulation limit
-    else{ for(let i=0;i<8;i++){step();if(!isMoving())break;} }
+    if(rollFrames>420) fastForward();
+    else{
+      for(let i=0;i<8;i++){step();if(!isMoving())break;}
+      // Record frame for replay (every 2nd frame to save memory)
+      if(rollFrames%2===0) replayFrames.push(balls.map(b=>({x:b.x,y:b.y,onTable:b.onTable,rotX:b.rotX,rotY:b.rotY,type:b.type,num:b.num,cIdx:b.cIdx,stripe:b.stripe})));
+    }
     if(!isMoving())phase='done';
   }
   else if(phase==='done'){afterShot();}
+  
+  // Replay playback mode
+  if(replayPlaying){
+    if(replayIdx<replayFrames.length){
+      const frame=replayFrames[replayIdx];
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      drawTable();
+      const s=S();
+      const lx=canvas.width/2,ly=-canvas.height*0.3;
+      for(const snap of frame){
+        if(!snap.onTable) continue;
+        const p=tc(snap.x,snap.y);
+        drawBallAt(p.x,p.y,snap.cIdx>=0?BALL_COLORS[snap.cIdx]:'#e8e0d0',snap.stripe,BR*s,snap.num,lx,ly,snap.rotX,snap.rotY);
+      }
+      // Draw REPLAY label
+      ctx.save();
+      ctx.font=`bold ${20*s}px Impact,sans-serif`;
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.textAlign='center';
+      ctx.fillText('\u25B6 REPLAY',canvas.width/2,30*s);
+      ctx.restore();
+      replayIdx++;
+    } else {
+      replayPlaying=false;
+      replayIdx=0;
+    }
+    return;
+  }
+  
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawTable();drawAllBalls();drawCue();drawPlacing();
 }
@@ -1298,6 +1336,11 @@ function startGame(){setupGame();document.getElementById('ov').classList.add('h'
 document.getElementById('bs').addEventListener('click',startGame);
 document.getElementById('bng').addEventListener('click',startGame);
 document.getElementById('bskip').addEventListener('click',skipAction);
+document.getElementById('breplay').addEventListener('click',function(){
+  if(replayFrames.length>0 && !replayPlaying && phase!=='rolling'){
+    replayPlaying=true;replayIdx=0;
+  }
+});
 
 loop();
 </script>
