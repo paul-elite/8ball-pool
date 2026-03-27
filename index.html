@@ -399,7 +399,7 @@ const tc=(x,y)=>({x:(RAIL+CUSHION+x)*S(),y:(RAIL+CUSHION+y)*S()});
 const ct=(x,y)=>({x:x/S()-RAIL-CUSHION,y:y/S()-RAIL-CUSHION});
 
 // Physics
-const P={mu_r:0.012,mu_s:0.15,e_cush:0.82,mu_cush:0.25,e_ball:0.96,mu_ball:0.04,g:1.0,R:BR,I:0.4*BR*BR,MIN_V:0.06,MIN_W:0.004,NOISE:0.00004,SUBS:8,DT:0.016*0.78};
+const P={mu_r:0.010,mu_s:0.14,e_cush:0.80,mu_cush:0.24,e_ball:0.94,mu_ball:0.04,g:1.0,R:BR,I:0.4*BR*BR,MIN_V:0.05,MIN_W:0.003,NOISE:0.00003,SUBS:10,DT:0.016*0.78};
 
 // Game State
 let balls=[],cueBall=null,uid=0;
@@ -463,7 +463,7 @@ for(let i=0;i<20;i++){
 const powerSegs=[...powerMeter.querySelectorAll('.power-segment')];
 
 function mkBall(type,num,cIdx,stripe,x,y){
-  return{id:uid++,type,num,cIdx,stripe,x,y,vx:0,vy:0,wx:0,wy:0,wz:0,rotX:Math.random()*Math.PI*2,rotY:Math.random()*Math.PI*2,sliding:false,onTable:true,pottedBy:-1};
+  return{id:uid++,type,num,cIdx,stripe,x,y,vx:0,vy:0,wx:0,wy:0,wz:0,rotX:Math.random()*Math.PI*2,rotY:Math.random()*Math.PI*2,sliding:false,onTable:true,pottedBy:-1,px:x,py:y,protX:0,protY:0};
 }
 
 function setupGame(){
@@ -1426,6 +1426,8 @@ function loop(){
     rollFrames++;
     if(rollFrames>420) fastForward();
     else{
+      // Store previous positions for interpolation
+      for(const b of balls){b.px=b.x;b.py=b.y;b.protX=b.rotX;b.protY=b.rotY;}
       for(let i=0;i<8;i++){step();if(!isMoving())break;}
       // Record frame for replay (every 2nd frame to save memory)
       if(rollFrames%2===0) replayFrames.push(balls.map(b=>({x:b.x,y:b.y,onTable:b.onTable,rotX:b.rotX,rotY:b.rotY,type:b.type,num:b.num,cIdx:b.cIdx,stripe:b.stripe})));
