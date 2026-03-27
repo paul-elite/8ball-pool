@@ -129,7 +129,7 @@ const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
 function resize(){
   const w=document.getElementById('cw');
-  const s=Math.min((w.clientWidth-8)/TOTAL_W,(w.clientHeight-8)/TOTAL_H);
+  const s=Math.min((w.clientWidth-8)/TOTAL_W,(w.clientHeight-8)/TOTAL_H)*0.66;
   canvas.width=Math.round(TOTAL_W*s); canvas.height=Math.round(TOTAL_H*s);
   canvas.dataset.s=s;
 }
