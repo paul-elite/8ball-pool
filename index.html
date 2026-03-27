@@ -256,7 +256,7 @@ function updateTimer(){
   document.getElementById('timer').textContent=m+':'+s;
 }
 
-// Audio - Realistic synthesized pool sounds
+// Audio - Realistic pool sounds
 let _ac=null,_lim=null;
 function getAC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();if(_ac.state==='suspended')_ac.resume();return _ac;}
 function getOut(){
@@ -277,38 +277,35 @@ function createNoiseBuffer(ac,duration){
   return buf;
 }
 
-// Cue strike - leather tip click + wood resonance + ball contact
+// Preload cue strike sound
+let cueStrikeBuffer=null;
+fetch('cue-strike.mp3')
+  .then(r=>r.arrayBuffer())
+  .then(buf=>getAC().decodeAudioData(buf))
+  .then(decoded=>{cueStrikeBuffer=decoded;})
+  .catch(()=>console.log('Cue sound not loaded, using fallback'));
+
+// Cue strike - use MP3 sample
 function snd_strike(pct){
-  const ac=getAC(),t=ac.currentTime,v=0.15+pct*0.003;
-
-  // Sharp leather tip click (high freq noise burst)
-  const noiseBuf=createNoiseBuffer(ac,0.03);
-  const noise=ac.createBufferSource();noise.buffer=noiseBuf;
-  const noiseFilter=ac.createBiquadFilter();noiseFilter.type='bandpass';noiseFilter.frequency.value=4000;noiseFilter.Q.value=2;
-  const noiseGain=ac.createGain();noiseGain.gain.setValueAtTime(v*0.8,t);noiseGain.gain.exponentialRampToValueAtTime(0.001,t+0.025);
-  noise.connect(noiseFilter);noiseFilter.connect(noiseGain);noiseGain.connect(getOut());
-  noise.start(t);noise.stop(t+0.03);
-
-  // Wood shaft thump
-  const shaft=ac.createOscillator();shaft.type='triangle';
-  shaft.frequency.setValueAtTime(200+pct,t);shaft.frequency.exponentialRampToValueAtTime(80,t+0.08);
-  const shaftGain=ac.createGain();shaftGain.gain.setValueAtTime(v*0.5,t+0.003);shaftGain.gain.exponentialRampToValueAtTime(0.001,t+0.1);
-  shaft.connect(shaftGain);shaftGain.connect(getOut());
-  shaft.start(t+0.003);shaft.stop(t+0.1);
-
-  // Ball resonance (phenolic resin ball character)
-  const ball=ac.createOscillator();ball.type='sine';
-  ball.frequency.setValueAtTime(1800+pct*10,t+0.001);
-  const ballGain=ac.createGain();ballGain.gain.setValueAtTime(v*0.3,t+0.001);ballGain.gain.exponentialRampToValueAtTime(0.001,t+0.06);
-  ball.connect(ballGain);ballGain.connect(getOut());
-  ball.start(t+0.001);ball.stop(t+0.06);
-
-  // Low body thud
-  const body=ac.createOscillator();body.type='sine';
-  body.frequency.setValueAtTime(90,t+0.005);body.frequency.exponentialRampToValueAtTime(45,t+0.12);
-  const bodyGain=ac.createGain();bodyGain.gain.setValueAtTime(v*0.6,t+0.005);bodyGain.gain.exponentialRampToValueAtTime(0.001,t+0.15);
-  body.connect(bodyGain);bodyGain.connect(getOut());
-  body.start(t+0.005);body.stop(t+0.15);
+  const ac=getAC();
+  if(cueStrikeBuffer){
+    const source=ac.createBufferSource();
+    source.buffer=cueStrikeBuffer;
+    // Adjust playback rate based on power (subtle pitch variation)
+    source.playbackRate.value=0.95+pct*0.001;
+    const gain=ac.createGain();
+    gain.gain.value=0.4+pct*0.006;
+    source.connect(gain);
+    gain.connect(getOut());
+    source.start();
+  }else{
+    // Fallback synthesized sound
+    const t=ac.currentTime,v=0.15+pct*0.003;
+    const o=ac.createOscillator();o.type='sine';
+    o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(60,t+0.1);
+    const g=ac.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+    o.connect(g);g.connect(getOut());o.start(t);o.stop(t+0.15);
+  }
 }
 
 // Ball-ball collision - sharp phenolic click with multiple resonances
