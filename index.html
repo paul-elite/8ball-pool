@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>8-Ball Pool</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Geist:wght@700;900&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#0a0a0a;--panel:#111;--border:#1e1e1e;--text:#e4ddd0;--dim:#5a544a;--gold:#c8a84b;--gold-d:#5a3f10;--danger:#e04444;}
 html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow:hidden;user-select:none;}
@@ -729,25 +729,24 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
 
   ctx.save();ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.clip();
 
-  // Calculate 3D rotation for number/stripe position
+  // Calculate 3D rotation - number is on the front face of the ball
   const cosX=Math.cos(rotX),sinX=Math.sin(rotX);
   const cosY=Math.cos(rotY),sinY=Math.sin(rotY);
-  // Project point on sphere surface (number faces "up" initially)
+  // Surface point projection (synced for both stripe and number)
   const surfaceZ=cosX*cosY;
-  const surfaceX=sinY*r*0.65;
-  const surfaceY=-sinX*cosY*r*0.65;
+  const surfaceX=sinY*r*0.6;
+  const surfaceY=-sinX*r*0.6;
   const visible=surfaceZ>0;
-  const scale=0.5+surfaceZ*0.5;
+  const scale=0.6+surfaceZ*0.4;
 
   if(stripe){
     ctx.fillStyle='#f0ece0';ctx.fillRect(px-r,py-r,r*2,r*2);
-    // Rotating stripe band
+    // Rotating stripe band - synced with number
     ctx.save();
     ctx.translate(px,py);
-    ctx.rotate(rotY);
-    const stripeOffset=sinX*r*0.6;
+    const stripeY=surfaceY;
     ctx.fillStyle=color;
-    ctx.fillRect(-r,stripeOffset-r*.44,r*2,r*.88);
+    ctx.fillRect(-r,stripeY-r*.4,r*2,r*.8);
     ctx.restore();
   } else {
     const g=ctx.createRadialGradient(hlx,hly,r*.04,px,py,r);
@@ -764,18 +763,18 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   ctx.fillStyle=`rgba(255,255,255,${(lightInt*0.5).toFixed(2)})`;ctx.fill();
   ctx.restore();
 
-  // Draw number with 3D rolling effect
+  // Draw number with 3D rolling effect - synced with stripe
   if(num>0&&visible){
     const numX=px+surfaceX,numY=py+surfaceY;
-    const fs=Math.max(6,Math.round(r*.64*scale));
-    const circleR=r*.34*scale;
+    const fs=Math.max(8,Math.round(r*.75*scale));
+    const circleR=r*.38*scale;
     const alpha=Math.min(1,surfaceZ*1.5).toFixed(2);
     ctx.beginPath();ctx.arc(numX,numY,circleR,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${alpha*.85})`;ctx.fill();
-    ctx.font=`500 ${fs}px "DM Mono",monospace`;
+    ctx.fillStyle=`rgba(255,255,255,${alpha*.9})`;ctx.fill();
+    ctx.font=`900 ${fs}px "Geist",sans-serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle=`rgba(17,17,17,${alpha})`;
-    ctx.fillText(num,numX,numY+1*scale);
+    ctx.fillStyle=`rgba(0,0,0,${alpha})`;
+    ctx.fillText(num,numX,numY);
   }
   ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
   ctx.strokeStyle='rgba(0,0,0,.32)';ctx.lineWidth=.6;ctx.stroke();
