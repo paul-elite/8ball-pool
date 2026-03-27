@@ -696,12 +696,12 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   const cosY=Math.cos(rotY),sinY=Math.sin(rotY);
   // 3D sphere point projection for number position
   const surfaceZ=cosX*cosY;
-  // Number position rotates with the ball in both axes
+  // Number position rotating with the ball mathematically locked to the 2D plane
   const rawX=sinY*cosX;
-  const rawY=-sinX;
-  // Apply rotation to sync with stripe
-  const surfaceX=(rawX*Math.cos(rotY*0.5)-rawY*Math.sin(rotY*0.5))*r*0.5;
-  const surfaceY=(rawX*Math.sin(rotY*0.5)+rawY*Math.cos(rotY*0.5))*r*0.5;
+  const rawY=sinX; // Fixed axis reflection
+  // Apply standard 2D rotation matrix to perfectly pin the number directly to the stripe's center at all times!
+  const surfaceX=(rawX*cosY - rawY*sinY)*r*0.5;
+  const surfaceY=(rawX*sinY + rawY*cosY)*r*0.5;
   const visible=surfaceZ>0;
   const scale=0.55+surfaceZ*0.45;
   const circleR=r*.38*scale;
