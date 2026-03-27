@@ -21,9 +21,35 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#6a5,#485);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;}
 .player-name{font-size:20px;font-weight:800;letter-spacing:1px;}
 .player-bar{width:120px;height:12px;background:#333;border-radius:6px;overflow:hidden;}
-.player-bar-fill{height:100%;border-radius:6px;}
-.player-bar-fill.p1{background:linear-gradient(90deg,#e44,#fa0,#fc0);width:70%;}
-.player-bar-fill.p2{background:linear-gradient(90deg,#888,#aaa);width:100%;}
+.player-bar-fill{height:100%;border-radius:6px;width:0%;transition:width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+.player-bar-fill.p1{background:linear-gradient(90deg,#e44,#fa0,#fc0);}
+.player-bar-fill.p2{background:linear-gradient(90deg,#888,#aaa);}
+
+#streak-overlay {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  z-index: 205;
+  opacity: 0;
+  text-shadow: 4px 4px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+  color: #fa0;
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: 120px;
+  font-style: italic;
+  font-weight: 900;
+}
+#streak-overlay.active {
+  animation: pop-streak 0.8s ease-out forwards;
+}
+@keyframes pop-streak {
+  0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
+  15% { transform: translate(-50%, -50%) scale(1.5) rotate(5deg); opacity: 1; }
+  30% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); }
+  80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 0; }
+}
 #timer{background:var(--bg-dark);padding:6px 20px;border-radius:8px;font-size:18px;font-weight:600;border:1px solid var(--border);}
 .icon-btn{width:44px;height:44px;border-radius:8px;background:transparent;border:2px solid var(--border);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -206,6 +232,10 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   </svg>
 </div>
 
+<div id="streak-overlay">
+  <div class="streak-text">X2</div>
+</div>
+
 <script>
 const BALL_COLORS=['#f4c430','#1a4acc','#cc2222','#7a1aaa','#ff6600','#1a8a2a','#8a2020'];
 const TW=880,TH=440,CUSHION=36,RAIL=18;
@@ -253,6 +283,28 @@ let firstHit=null,pottedShot=[];
 let foulMsg='',turnMsg='',extraMsg='';
 let freeBall=false,power=0,charging=false,aimAngle=0,spinX=0,spinY=0;
 let gameTime=0,timerInterval=null;
+let playerStreaks=[0,0];
+
+function showStreak(count, pIdx) {
+  if (count === 0) {
+    const fill = document.querySelector(`.player-bar-fill.p${pIdx+1}`);
+    if(fill) fill.style.width = '0%';
+    return;
+  }
+  const pct = Math.min(100, (count / 7) * 100);
+  const fill = document.querySelector(`.player-bar-fill.p${pIdx+1}`);
+  if(fill) fill.style.width = pct + '%';
+  
+  if (count > 1) {
+    const overlay = document.getElementById('streak-overlay');
+    if(!overlay) return;
+    const text = overlay.querySelector('.streak-text');
+    if(text) text.textContent = 'X' + count;
+    overlay.classList.remove('active');
+    void overlay.offsetWidth;
+    overlay.classList.add('active');
+  }
+}
 
 // Power meter segments
 const powerMeter=document.getElementById('power-meter');
@@ -275,6 +327,8 @@ function setupGame(){
   uid=0;balls=[];pottedShot=[];firstHit=null;allPotted=[];
   groups=[null,null];openTable=true;freeBall=false;foulMsg='';
   aiThinking=false;aiDelay=0;
+  playerStreaks=[0,0];
+  document.querySelectorAll('.player-bar-fill').forEach(el=>el.style.width='0%');
   cueBall=mkBall('cue',0,-1,false,BAULK_X,TH*.5);
   balls.push(cueBall);
   balls.push(mkBall('eight',8,-1,false,0,0));
@@ -566,13 +620,22 @@ function afterShot(){
     }
 
     if(foul){
+      playerStreaks[curP]=0;
+      showStreak(0, curP);
       foulMsg=fR;freeBall=true;
       cueBall.onTable=true;cueBall.vx=0;cueBall.vy=0;
       cueBall.x=BAULK_X;cueBall.y=TH*.5;
       curP=1-curP;phase='placing';
     }else{
       foulMsg='';freeBall=false;
-      if(!keep)curP=1-curP;
+      if(!keep){
+        playerStreaks[curP]=0;
+        showStreak(0, curP);
+        curP=1-curP;
+      }else{
+        playerStreaks[curP]++;
+        showStreak(playerStreaks[curP], curP);
+      }
       phase='aiming';
     }
 
