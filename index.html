@@ -101,7 +101,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 
 /* Right Panel - Power Meter */
 #right-panel{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;}
-#power-meter{width:28px;height:200px;background:var(--bg-dark);border:2px solid var(--border);border-radius:6px;display:flex;flex-direction:column-reverse;overflow:hidden;padding:3px;gap:2px;}
+#power-meter{width:48px;height:320px;background:var(--bg-dark);border:2px solid var(--border);border-radius:6px;display:flex;flex-direction:column-reverse;overflow:hidden;padding:3px;gap:2px;}
 .power-segment{flex:1;border-radius:2px;background:#1e3a1e;transition:background .05s;}
 .power-segment.active.c1{background:#0654FB;}
 .power-segment.active.c2{background:#28A3FB;}
@@ -1112,6 +1112,39 @@ function drawCue(){
   cueCtx.beginPath();cueCtx.moveTo(tx,ty);cueCtx.lineTo(bx,by);
   cueCtx.strokeStyle=g;cueCtx.lineWidth=4*s;cueCtx.lineCap='round';cueCtx.stroke();
   cueCtx.beginPath();cueCtx.arc(tx,ty,2.5*s,0,Math.PI*2);cueCtx.fillStyle='#5090b0';cueCtx.fill();
+
+  // Mini power bar hovering above the cue stick
+  if(charging || power > 0){
+    const barLen = 60*s, barH = 6*s;
+    const perpX = -dy, perpY = dx; // Perpendicular to cue
+    const midX = (tx+bx)/2, midY = (ty+by)/2;
+    const mbx = midX + perpX*14*s, mby = midY + perpY*14*s;
+    
+    // Background
+    cueCtx.save();
+    cueCtx.translate(mbx, mby);
+    cueCtx.rotate(aimAngle);
+    cueCtx.fillStyle='rgba(0,0,0,0.5)';
+    cueCtx.beginPath();
+    cueCtx.roundRect(-barLen/2, -barH/2, barLen, barH, barH/2);
+    cueCtx.fill();
+    
+    // Fill
+    const pct = power/100;
+    const fillW = barLen * pct;
+    if(fillW > 0){
+      const colors = ['#0654FB','#28A3FB','#0AE4C0','#23C217','#FAC526','#FC9424','#EF2626'];
+      const ci = Math.min(6, Math.floor(pct * 7));
+      const mg = cueCtx.createLinearGradient(-barLen/2,0,-barLen/2+fillW,0);
+      mg.addColorStop(0, colors[Math.max(0,ci-1)]);
+      mg.addColorStop(1, colors[ci]);
+      cueCtx.fillStyle = mg;
+      cueCtx.beginPath();
+      cueCtx.roundRect(-barLen/2, -barH/2, fillW, barH, barH/2);
+      cueCtx.fill();
+    }
+    cueCtx.restore();
+  }
 }
 
 function drawPlacing(){
