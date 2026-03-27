@@ -782,7 +782,8 @@ function drawCue(){
   let targetGhost = null;
   let lines = [];
   
-  for(let bounce=0; bounce<3; bounce++) {
+  // Maintain only 1 step/bounce of prediction
+  for(let bounce=0; bounce<2; bounce++) {
     let minT = Infinity;
     let hitType = null;
     let hitBall = null;
@@ -836,8 +837,18 @@ function drawCue(){
     const mx = targetBall.x - targetGhost.x, my = targetBall.y - targetGhost.y;
     const dist = Math.hypot(mx,my);
     if(dist > 0.001){
-      const vX = mx/dist, vY = my/dist;
-      lines.push({type:'yellow', x1:targetBall.x+vX*BR, y1:targetBall.y+vY*BR, x2:targetBall.x+vX*150, y2:targetBall.y+vY*150});
+      const nX = mx/dist, nY = my/dist;
+      // Yellow prediction line for the target ball
+      lines.push({type:'yellow', x1:targetBall.x+nX*BR, y1:targetBall.y+nY*BR, x2:targetBall.x+nX*150, y2:targetBall.y+nY*150});
+      
+      // White prediction line for the cue ball's tangent deflection
+      const dot = rayDX*nX + rayDY*nY;
+      let tx = rayDX - dot*nX, ty = rayDY - dot*nY;
+      const tDist = Math.hypot(tx, ty);
+      if(tDist > 0.001){
+        tx /= tDist; ty /= tDist;
+        lines.push({type:'white', x1:targetGhost.x+tx*BR, y1:targetGhost.y+ty*BR, x2:targetGhost.x+tx*100, y2:targetGhost.y+ty*100});
+      }
     }
   }
 
