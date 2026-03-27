@@ -695,43 +695,7 @@ function generateTableCache() {
     tCtx.save();tCtx.translate(rightX,yPos);tCtx.rotate(Math.PI/4);
     tCtx.fillRect(-dSize/2,-dSize/2,dSize,dSize);tCtx.restore();
   }
-
-  // ── 2. POCKETS (drawn BEFORE cushions so cushions overlap) ──
-  POCKETS.forEach(pk=>{
-    const p=tc(pk.x,pk.y), pr=POCKET_R*s;
-    
-    // Outer pocket cut (dark recess in the wood)
-    tCtx.beginPath();tCtx.arc(p.x,p.y,pr*1.6,0,Math.PI*2);
-    const outerPG = tCtx.createRadialGradient(p.x,p.y,pr*0.5,p.x,p.y,pr*1.6);
-    outerPG.addColorStop(0,'#000');
-    outerPG.addColorStop(0.6,'#0a0a0a');
-    outerPG.addColorStop(1,'#1a0e06');
-    tCtx.fillStyle=outerPG;tCtx.fill();
-    
-    // Leather pocket lip ring
-    tCtx.beginPath();tCtx.arc(p.x,p.y,pr*1.25,0,Math.PI*2);
-    tCtx.lineWidth=3*s;
-    const lipGrad = tCtx.createRadialGradient(p.x-pr*0.3,p.y-pr*0.3,0,p.x,p.y,pr*1.3);
-    lipGrad.addColorStop(0,'#5a3a20');lipGrad.addColorStop(1,'#2a1a0a');
-    tCtx.strokeStyle=lipGrad;
-    tCtx.stroke();
-    
-    // Inner pocket depth (concentric rings for depth effect)
-    for(let ring=3;ring>=0;ring--){
-      const rr = pr*(0.4+ring*0.2);
-      const darkness = 0.02*ring;
-      tCtx.beginPath();tCtx.arc(p.x,p.y,rr,0,Math.PI*2);
-      tCtx.fillStyle=`rgba(${5+ring*2},${3+ring},${2+ring},${1-darkness})`;
-      tCtx.fill();
-    }
-    
-    // Inner pocket highlight (subtle mesh/net shimmer)
-    const meshGrad = tCtx.createRadialGradient(p.x+pr*0.15,p.y-pr*0.15,0,p.x,p.y,pr*0.6);
-    meshGrad.addColorStop(0,'rgba(40,30,20,0.3)');
-    meshGrad.addColorStop(1,'rgba(0,0,0,0)');
-    tCtx.beginPath();tCtx.arc(p.x,p.y,pr*0.6,0,Math.PI*2);
-    tCtx.fillStyle=meshGrad;tCtx.fill();
-  });
+  }
 
   // ── 3. CUSHIONS (Rubber with 3D beveled faces) ──
   // Each cushion is drawn as a trapezoid with individual gradient fills
@@ -816,6 +780,75 @@ function generateTableCache() {
   tCtx.beginPath();tCtx.moveTo(bl.x,by);tCtx.lineTo(bl.x,by+bh);tCtx.stroke();
   const dc2=tc(BAULK_X,TH*.5);
   tCtx.beginPath();tCtx.arc(dc2.x,dc2.y,D_RADIUS*s,Math.PI*.5,Math.PI*1.5);tCtx.stroke();
+
+  // ── 6. POCKETS (drawn LAST so they appear on top of everything) ──
+  POCKETS.forEach(pk=>{
+    const p=tc(pk.x,pk.y), pr=POCKET_R*s;
+    
+    // Outer pocket recess cut into wood/cushion
+    tCtx.beginPath();tCtx.arc(p.x,p.y,pr*1.5,0,Math.PI*2);
+    const outerPG = tCtx.createRadialGradient(p.x,p.y,pr*0.3,p.x,p.y,pr*1.5);
+    outerPG.addColorStop(0,'#000');
+    outerPG.addColorStop(0.5,'#060604');
+    outerPG.addColorStop(0.85,'#0e0a06');
+    outerPG.addColorStop(1,'#1a0e06');
+    tCtx.fillStyle=outerPG;tCtx.fill();
+    
+    // Inner pocket depth (concentric darkening rings)
+    for(let ring=4;ring>=0;ring--){
+      const rr = pr*(0.3+ring*0.18);
+      tCtx.beginPath();tCtx.arc(p.x,p.y,rr,0,Math.PI*2);
+      tCtx.fillStyle=`rgba(${2+ring*2},${1+ring},${1+ring},1)`;
+      tCtx.fill();
+    }
+    
+    // Subtle mesh/net shimmer inside the pocket
+    const meshGrad = tCtx.createRadialGradient(p.x+pr*0.1,p.y-pr*0.1,0,p.x,p.y,pr*0.5);
+    meshGrad.addColorStop(0,'rgba(50,35,25,0.25)');
+    meshGrad.addColorStop(1,'rgba(0,0,0,0)');
+    tCtx.beginPath();tCtx.arc(p.x,p.y,pr*0.5,0,Math.PI*2);
+    tCtx.fillStyle=meshGrad;tCtx.fill();
+    
+    // Leather pocket lip (outer ring)
+    tCtx.beginPath();tCtx.arc(p.x,p.y,pr*1.2,0,Math.PI*2);
+    tCtx.lineWidth=3.5*s;
+    const lipGrad = tCtx.createRadialGradient(p.x-pr*0.2,p.y-pr*0.2,0,p.x,p.y,pr*1.3);
+    lipGrad.addColorStop(0,'#6a4a2a');lipGrad.addColorStop(1,'#2a1608');
+    tCtx.strokeStyle=lipGrad;
+    tCtx.stroke();
+    
+    // Green rubber bumper nubs around the pocket mouth
+    // Determine which edges this pocket is near and draw small cushion guides
+    const isLeft = pk.x < TW*0.25;
+    const isRight = pk.x > TW*0.75;
+    const isTop = pk.y < TH*0.25;
+    const isBot = pk.y > TH*0.75;
+    const isMid = !isLeft && !isRight;
+    
+    const nubR = pr*0.35;
+    const nubDist = pr*1.35;
+    tCtx.fillStyle='#1a6030';
+    
+    if(isTop || isBot){
+      const dir = isTop ? -1 : 1;
+      // Left nub
+      if(!isMid || true){
+        const nx = p.x - nubDist*0.7, ny = p.y + dir*nubDist*0.3;
+        tCtx.beginPath();tCtx.arc(nx,ny,nubR,0,Math.PI*2);
+        const ng = tCtx.createRadialGradient(nx-nubR*0.3,ny-nubR*0.3,0,nx,ny,nubR);
+        ng.addColorStop(0,'#2a8848');ng.addColorStop(1,'#145828');
+        tCtx.fillStyle=ng;tCtx.fill();
+      }
+      // Right nub
+      if(!isMid || true){
+        const nx = p.x + nubDist*0.7, ny = p.y + dir*nubDist*0.3;
+        tCtx.beginPath();tCtx.arc(nx,ny,nubR,0,Math.PI*2);
+        const ng = tCtx.createRadialGradient(nx-nubR*0.3,ny-nubR*0.3,0,nx,ny,nubR);
+        ng.addColorStop(0,'#2a8848');ng.addColorStop(1,'#145828');
+        tCtx.fillStyle=ng;tCtx.fill();
+      }
+    }
+  });
 }
 
 function drawTable(){
