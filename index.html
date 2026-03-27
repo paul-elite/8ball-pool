@@ -1231,19 +1231,18 @@ function drawCue(){
     cueCtx.restore();
   }
 
-  // Draw rotating aim cursor along the aim line
+  // Draw rotating aim cursor near cue tip
   if(aimCursorImg.complete && !isAI[curP]){
-    const cursorDist = 120 * s; // Distance from cue ball
     const cursorSize = 28 * s;
-    // Position cursor in front of cue ball (opposite to cue stick direction)
-    const cursorX = ox - dx * cursorDist;
-    const cursorY = oy - dy * cursorDist;
+    const tipOffset = 20 * s; // Small gap from tip
+    // Position cursor just beyond the cue tip (tx, ty is the tip)
+    const cursorX = tx + dx * tipOffset;
+    const cursorY = ty + dy * tipOffset;
 
     cueCtx.save();
     cueCtx.translate(cursorX, cursorY);
-    // Rotate to align with aim direction (pointing toward where ball will go)
-    // The hand SVG points up by default, so rotate to match aim angle + 90 degrees
-    cueCtx.rotate(aimAngle + Math.PI/2);
+    // Rotate to align with cue stick direction (pointing along the cue)
+    cueCtx.rotate(aimAngle - Math.PI/2);
     cueCtx.drawImage(aimCursorImg, -cursorSize/2, -cursorSize/2, cursorSize, cursorSize);
     cueCtx.restore();
   }
