@@ -97,7 +97,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
     <div class="ss">
       <div class="ps on" id="p1s"><span class="l">Player 1</span><span class="p" id="p1p">0</span><span class="g" id="p1g">OPEN</span></div>
       <span style="color:var(--border);font-size:18px">·</span>
-      <div class="ps" id="p2s"><span class="l">Player 2</span><span class="p" id="p2p">0</span><span class="g" id="p2g">OPEN</span></div>
+      <div class="ps" id="p2s"><span class="l">CPU</span><span class="p" id="p2p">0</span><span class="g" id="p2g">OPEN</span></div>
     </div>
     <button class="btn" id="bng">New Game</button>
   </div>
@@ -180,6 +180,8 @@ const P={
 let balls=[],cueBall=null,uid=0;
 let phase='idle',curP=0,wins=[0,0];
 let allPotted=[];
+let isAI=[false,true]; // Player 2 is AI by default
+let aiThinking=false,aiDelay=0;
 let groups=[null,null],openTable=true;
 let firstHit=null,pottedShot=[];
 let foulMsg='',turnMsg='',extraMsg='';
@@ -198,6 +200,7 @@ function mkBall(type,num,cIdx,stripe,x,y){
 function setupGame(){
   uid=0;balls=[];pottedShot=[];firstHit=null;allPotted=[];
   groups=[null,null];openTable=true;freeBall=false;foulMsg='';
+  aiThinking=false;aiDelay=0;
   updatePottedStack();
   cueBall=mkBall('cue',0,-1,false,BAULK_X-D_RADIUS*.5,TH*.5);
   balls.push(cueBall);
@@ -1020,11 +1023,116 @@ window.addEventListener('mouseup',()=>{spinDrag=false;spinDragEl=null;});
 function chargePwr(){if(!charging)return;power=Math.min(100,power+1.6);updPow();}
 
 // ════════════════════════════════════════════════════════════
+//  AI PLAYER
+// ════════════════════════════════════════════════════════════
+function getValidTargets(){
+  const mg=myGroup();
+  if(needEight())return balls.filter(b=>b.onTable&&b.type==='eight');
+  if(mg==='solid')return balls.filter(b=>b.onTable&&b.type==='solid');
+  if(mg==='stripe')return balls.filter(b=>b.onTable&&b.type==='stripe');
+  return balls.filter(b=>b.onTable&&b.type!=='cue'&&b.type!=='eight');
+}
+
+function lineHitsBall(x1,y1,x2,y2,bx,by,ignore){
+  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
+  if(len<1)return false;
+  const nx=dx/len,ny=dy/len;
+  for(const b of balls){
+    if(!b.onTable||b===ignore||b===cueBall)continue;
+    const px=b.x-x1,py=b.y-y1;
+    const proj=px*nx+py*ny;
+    if(proj<0||proj>len)continue;
+    const perpX=px-proj*nx,perpY=py-proj*ny;
+    if(Math.hypot(perpX,perpY)<BR*2)return true;
+  }
+  return false;
+}
+
+function evaluateShot(target,pocket){
+  const dx=pocket.x-target.x,dy=pocket.y-target.y;
+  const distToPocket=Math.hypot(dx,dy);
+  const angToPocket=Math.atan2(dy,dx);
+  // Ghost ball position
+  const ghostX=target.x-Math.cos(angToPocket)*BR*2;
+  const ghostY=target.y-Math.sin(angToPocket)*BR*2;
+  const distCueToGhost=Math.hypot(ghostX-cueBall.x,ghostY-cueBall.y);
+  // Check clear path cue->ghost
+  if(lineHitsBall(cueBall.x,cueBall.y,ghostX,ghostY,target.x,target.y,target))return null;
+  // Check clear path target->pocket
+  if(lineHitsBall(target.x,target.y,pocket.x,pocket.y,0,0,target))return null;
+  // Angle quality (straighter is better)
+  const cueAng=Math.atan2(ghostY-cueBall.y,ghostX-cueBall.x);
+  const cutAngle=Math.abs(Math.atan2(Math.sin(angToPocket-cueAng),Math.cos(angToPocket-cueAng)));
+  if(cutAngle>Math.PI*0.7)return null; // Too sharp
+  const score=1000-distToPocket*0.5-distCueToGhost*0.3-cutAngle*200;
+  return{target,pocket,ghostX,ghostY,angle:cueAng,score,power:Math.min(85,30+distCueToGhost*0.15+distToPocket*0.1)};
+}
+
+function findBestShot(){
+  const targets=getValidTargets();
+  let best=null;
+  for(const t of targets){
+    for(const pk of POCKETS){
+      const shot=evaluateShot(t,pk);
+      if(shot&&(!best||shot.score>best.score))best=shot;
+    }
+  }
+  // Fallback: just hit any valid ball
+  if(!best&&targets.length>0){
+    const t=targets[0];
+    const ang=Math.atan2(t.y-cueBall.y,t.x-cueBall.x);
+    best={target:t,angle:ang,power:40,score:0};
+  }
+  return best;
+}
+
+function aiTakeTurn(){
+  if(phase==='placing'){
+    // Place cue ball in good position
+    if(freeBall){
+      cueBall.x=BAULK_X;cueBall.y=TH*0.5;
+    }else{
+      cueBall.x=BAULK_X-D_RADIUS*0.5;cueBall.y=TH*0.5;
+    }
+    phase='aiming';foulMsg='';
+    const mg=myGroup(),ne=needEight();
+    turnMsg=`Player ${curP+1} — pot ${openTable?'any ball':ne?'8-ball':`${mg}s`}`;
+    extraMsg='';updateUI();
+    aiDelay=30;aiThinking=true;
+    return;
+  }
+  const shot=findBestShot();
+  if(shot){
+    aimAngle=shot.angle;
+    power=shot.power;updPow();
+    shoot();
+  }else{
+    // Random shot as last resort
+    aimAngle=Math.random()*Math.PI*2;
+    power=50;updPow();
+    shoot();
+  }
+  aiThinking=false;
+}
+
+function aiUpdate(){
+  if(!isAI[curP]||phase==='rolling'||phase==='done'||phase==='idle')return;
+  if(aiThinking){
+    aiDelay--;
+    if(aiDelay<=0)aiTakeTurn();
+  }else if(phase==='aiming'||phase==='placing'){
+    aiThinking=true;
+    aiDelay=40; // Thinking delay
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 //  LOOP
 // ════════════════════════════════════════════════════════════
 function loop(){
   requestAnimationFrame(loop);
   chargePwr();
+  aiUpdate();
   if(phase==='rolling'){
     for(let i=0;i<8;i++){step();if(!isMoving())break;}
     if(!isMoving())phase='done';
