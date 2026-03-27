@@ -1236,11 +1236,13 @@ function drawCue(){
     const cursorSize = 28 * s;
     const tipOffset = 12 * s; // Small gap from tip along cue direction
     const sideOffset = 24 * s; // Offset to the left of cue
+    // Pull back faster than the stick based on power (stick pull is ~50, cursor pulls ~100)
+    const cursorPullBack = (power / 100) * 100 * s;
     // Perpendicular vector (to the left): (dy, -dx)
     const perpX = dy, perpY = -dx;
-    // Position cursor beside cue tip, offset to the left
-    const cursorX = tx + dx * tipOffset + perpX * sideOffset;
-    const cursorY = ty + dy * tipOffset + perpY * sideOffset;
+    // Position cursor beside cue tip, offset to the left, pulled back with power
+    const cursorX = tx + dx * (tipOffset + cursorPullBack) + perpX * sideOffset;
+    const cursorY = ty + dy * (tipOffset + cursorPullBack) + perpY * sideOffset;
 
     cueCtx.save();
     cueCtx.translate(cursorX, cursorY);
