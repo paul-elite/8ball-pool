@@ -120,7 +120,7 @@ canvas{display:block;cursor:crosshair;}
 // ════════════════════════════════════════════════════════════
 const TW=880,TH=440,CUSHION=36,RAIL=18;
 const TOTAL_W=TW+CUSHION*2+RAIL*2, TOTAL_H=TH+CUSHION*2+RAIL*2;
-const BR=11, POCKET_R=20, MAX_POWER=180;
+const BR=11, POCKET_R=20, MAX_POWER=320;
 const BAULK_X=TW*0.2, D_RADIUS=TH*0.185;
 const POCKETS=[{x:0,y:0},{x:TW/2,y:-2},{x:TW,y:0},{x:0,y:TH},{x:TW/2,y:TH+2},{x:TW,y:TH}];
 const BALL_COLORS=['#e8c830','#1a4acc','#cc2222','#7a1aaa','#cc5500','#1a8a2a','#8a2020'];
@@ -388,11 +388,10 @@ function stepBall(b,dt){
   b.y+=b.vy*dt;
   b.wz+=spd*dt/P.R; // visual rotation accumulator
 
-  // Spring squash toward speed
-  const tSq=Math.min(.38,spd*.018);
-  b.spr.sq+=(tSq-b.spr.sq)*.14;
-  b.spr.wobAmp*=.91;
-  b.spr.wob+=.26;
+  // Minimal squash effect
+  b.spr.sq*=.8;
+  b.spr.wobAmp*=.8;
+  b.spr.wob+=.3;
 }
 
 function resolveCushion(b,silent){
@@ -413,7 +412,6 @@ function resolveCushion(b,silent){
     b.wx+=(J_t*ty*P.R)/P.I;
     b.sliding=true;
     const imp=Math.abs(vn);
-    b.spr.wobAmp=Math.min(.30,imp*.05);b.spr.wobAng=Math.atan2(ny,nx);b.spr.wob=0;
     if(!silent&&imp>.8) snd_cushion(imp);
   }
   if(b.x-P.R<0)  {b.x=P.R;    bounce( 1, 0);}
@@ -446,8 +444,6 @@ function resolveBallBall(a,b,silent){
   b.wx-=(J_t*ty*P.R)/P.I;b.wy+=(J_t*tx*P.R)/P.I;
   a.sliding=true;b.sliding=true;
   const imp=Math.abs(dv_n);
-  a.spr.wobAmp=Math.min(.28,imp*.06);a.spr.wobAng=Math.atan2(-ny,-nx);a.spr.wob=0;
-  b.spr.wobAmp=Math.min(.28,imp*.06);b.spr.wobAng=Math.atan2(ny,nx);b.spr.wob=0;
   if(!silent&&imp>.4) snd_clack(imp);
 }
 
@@ -498,8 +494,7 @@ function shoot(){
   cueBall.wx=-spinY*sc;  // top widget = topspin
   cueBall.wy= spinX*sc;  // right widget = right sidespin
   cueBall.sliding=true;
-  cueBall.spr.sq=Math.min(.32,pct*.003);
-  cueBall.spr.wobAmp=.14;cueBall.spr.wobAng=aimAngle;cueBall.spr.wob=0;
+  cueBall.spr.sq=0;cueBall.spr.wobAmp=0;
   firstHit=null;pottedShot=[];
   phase='rolling';power=0;updPow();
   snd_strike(pct);
@@ -751,17 +746,7 @@ function drawAllBalls(){
     if(!b.onTable)continue;
     const p=tc(b.x,b.y);
     const col=b.type==='cue'?'#f5f0e8':b.type==='eight'?'#111':BALL_COLORS[b.cIdx];
-    const sp=b.spr;
-    if(!sp||(!sp.sq&&!sp.wobAmp)){
-      drawBallAt(p.x,p.y,col,b.stripe,r,b.num);continue;
-    }
-    const spd=Math.hypot(b.vx,b.vy);
-    const vAng=spd>P.MIN_V?Math.atan2(b.vy,b.vx):sp.wobAng;
-    const sq=sp.sq,wob=sp.wobAmp*Math.sin(sp.wob)*.5,total=sq+wob;
-    ctx.save();
-    ctx.translate(p.x,p.y);ctx.rotate(vAng);ctx.scale(1+total*.5,1-total*.4);ctx.rotate(-vAng);ctx.translate(-p.x,-p.y);
     drawBallAt(p.x,p.y,col,b.stripe,r,b.num);
-    ctx.restore();
   }
 }
 
