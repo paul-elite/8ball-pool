@@ -50,6 +50,31 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 0; }
 }
+#event-overlay {
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  pointer-events:none;z-index:120;
+  font-family:'Bebas Neue',Impact,sans-serif;
+  font-size:clamp(36px,6vw,72px);font-weight:900;
+  color:#fff;text-align:center;white-space:nowrap;
+  text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.6), 0 0 60px rgba(255,200,0,0.3);
+  letter-spacing:3px;text-transform:uppercase;
+  opacity:0;
+}
+#event-overlay.active {
+  animation: event-pop 1.8s ease-out forwards;
+}
+#event-overlay .evt-sub {
+  font-size:0.45em;letter-spacing:1px;color:rgba(255,255,255,0.7);
+  text-shadow:0 2px 6px rgba(0,0,0,0.5);
+  margin-top:2px;
+}
+@keyframes event-pop {
+  0%   { transform:translate(-50%,-50%) scale(0) rotate(-8deg); opacity:0; }
+  12%  { transform:translate(-50%,-50%) scale(1.15) rotate(2deg); opacity:1; }
+  22%  { transform:translate(-50%,-50%) scale(1) rotate(0deg); opacity:1; }
+  75%  { transform:translate(-50%,-50%) scale(1) rotate(0deg); opacity:1; }
+  100% { transform:translate(-50%,-50%) scale(0.9) rotate(0deg); opacity:0; }
+}
 #timer{background:var(--bg-dark);padding:6px 20px;border-radius:8px;font-size:18px;font-weight:600;border:1px solid var(--border);}
 .icon-btn{width:44px;height:44px;border-radius:8px;background:transparent;border:2px solid var(--border);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -236,6 +261,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 <div id="streak-overlay">
   <div class="streak-text">X2</div>
 </div>
+<div id="event-overlay"></div>
 
 <script>
 const BALL_COLORS=['#f4c430','#1a4acc','#cc2222','#7a1aaa','#ff6600','#1a8a2a','#8a2020'];
@@ -307,6 +333,15 @@ function showStreak(count, pIdx) {
     void overlay.offsetWidth;
     overlay.classList.add('active');
   }
+}
+
+function showEvent(main, sub) {
+  const el = document.getElementById('event-overlay');
+  if(!el) return;
+  el.innerHTML = main + (sub ? `<div class="evt-sub">${sub}</div>` : '');
+  el.classList.remove('active');
+  void el.offsetWidth;
+  el.classList.add('active');
 }
 
 // Power meter segments
@@ -603,6 +638,9 @@ function afterShot(){
       cueBall.onTable=true;cueBall.vx=0;cueBall.vy=0;
       cueBall.x=BAULK_X;cueBall.y=TH*.5;
       curP=1-curP;phase='placing';
+      // Show foul overlay
+      if(fR.toLowerCase().includes('scratch')) showEvent('SCRATCH!', curP===0?'Your ball in hand':'CPU ball in hand');
+      else showEvent('FOUL', fR);
     }else{
       foulMsg='';freeBall=false;
       if(!keep){
@@ -614,8 +652,26 @@ function afterShot(){
         showStreak(playerStreaks[curP], curP);
       }
       phase='aiming';
+      // Show turn/group announcements
+      if(!openTable && groups[curP]){
+        const gName = groups[curP]==='solid'?'Solids':'Stripes';
+        if(keep){
+          showEvent(curP===0?'YOUR TURN':'CPU TURN', 'Still shooting');
+        } else {
+          showEvent(curP===0?'YOUR TURN':'CPU TURN', gName);
+        }
+      } else if(openTable){
+        showEvent(curP===0?'YOUR TURN':'CPU TURN', 'Open table');
+      }
     }
 
+    // Show group assignment announcement
+    if(!foul && !openTable && groups[0] && anyObj.length>0 && !groups._announced){
+      const p1g = groups[0]==='solid'?'Solids':'Stripes';
+      const p2g = groups[1]==='solid'?'Solids':'Stripes';
+      showEvent(`YOU\'RE ${p1g.toUpperCase()}!`, `CPU is ${p2g}`);
+      groups._announced = true;
+    }
     const mg=myGroup(),ne=needEight();
     turnMsg=`${curP===0?'Player 1':'CPU'} — ${openTable?'any ball':ne?'8-ball':mg+'s'}`;
     updateUI();updateBallTrays();return;
