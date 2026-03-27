@@ -72,16 +72,6 @@ canvas{display:block;cursor:crosshair;}
   .btn{font-size:8px;padding:6px 8px;}
 }
 
-/* Portrait mode - prompt to rotate */
-#rotate-prompt{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:20px;}
-#rotate-prompt svg{width:60px;height:60px;fill:var(--gold);animation:rotate-hint 2s ease-in-out infinite;}
-#rotate-prompt p{color:var(--dim);font-size:12px;letter-spacing:1px;}
-@keyframes rotate-hint{0%,100%{transform:rotate(0deg);}50%{transform:rotate(90deg);}}
-@media (max-width:600px) and (orientation:portrait){
-  #rotate-prompt{display:flex;}
-  #app,#ov,#mobile-hud{display:none !important;}
-}
-
 /* Very small screens */
 @media (max-height:380px){
   #header{padding:2px 8px;}
@@ -118,10 +108,6 @@ canvas{display:block;cursor:crosshair;}
   </div>
 </div>
 <div id="ov"><h2 id="ot">8-Ball Pool</h2><p id="os">UK Rules · Hot Seat</p><button class="btn pr" id="bs" style="width:140px;padding:10px">Start Game</button></div>
-<div id="rotate-prompt">
-  <svg viewBox="0 0 24 24"><path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c-.59.59-1.54.59-2.12 0L10.23 1.75zM4.22 8.75l5.66-5.66L19.78 13l-5.66 5.66L4.22 8.75zM7.52 21.48C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81-1.33 1.32z"/></svg>
-  <p>Rotate your device to landscape</p>
-</div>
 <div id="mobile-hud">
   <div class="mh-power"><div class="mh-power-label">Power</div><div class="mh-power-bar"><div class="mh-power-fill" id="mpb"></div></div></div>
   <div class="mh-spin"><canvas id="msc" width="56" height="56"></canvas></div>
@@ -134,7 +120,7 @@ canvas{display:block;cursor:crosshair;}
 // ════════════════════════════════════════════════════════════
 const TW=880,TH=440,CUSHION=36,RAIL=18;
 const TOTAL_W=TW+CUSHION*2+RAIL*2, TOTAL_H=TH+CUSHION*2+RAIL*2;
-const BR=11, POCKET_R=20, MAX_POWER=72;
+const BR=11, POCKET_R=20, MAX_POWER=180;
 const BAULK_X=TW*0.2, D_RADIUS=TH*0.185;
 const POCKETS=[{x:0,y:0},{x:TW/2,y:-2},{x:TW,y:0},{x:0,y:TH},{x:TW/2,y:TH+2},{x:TW,y:TH}];
 const BALL_COLORS=['#e8c830','#1a4acc','#cc2222','#7a1aaa','#cc5500','#1a8a2a','#8a2020'];
@@ -156,8 +142,8 @@ const ct=(x,y)=>({x:x/S()-RAIL-CUSHION,y:y/S()-RAIL-CUSHION});
 //  PHYSICS CONSTANTS  (Newtonian, SI-scaled to table units)
 // ════════════════════════════════════════════════════════════
 const P={
-  mu_r:    0.0018, // very low rolling resistance — balls coast like real snooker
-  mu_s:    0.06,   // low sliding friction — smooth spin transition
+  mu_r:    0.012,  // rolling resistance
+  mu_s:    0.15,   // sliding friction
   e_cush:  0.82,
   mu_cush: 0.25,
   e_ball:  0.96,
@@ -409,7 +395,7 @@ function stepBall(b,dt){
   b.spr.wob+=.26;
 }
 
-function resolveCushion(b){
+function resolveCushion(b,silent){
   function bounce(nx,ny){
     const vn=b.vx*nx+b.vy*ny;
     if(vn>=0) return;
@@ -428,7 +414,7 @@ function resolveCushion(b){
     b.sliding=true;
     const imp=Math.abs(vn);
     b.spr.wobAmp=Math.min(.30,imp*.05);b.spr.wobAng=Math.atan2(ny,nx);b.spr.wob=0;
-    if(imp>.8) snd_cushion(imp);
+    if(!silent&&imp>.8) snd_cushion(imp);
   }
   if(b.x-P.R<0)  {b.x=P.R;    bounce( 1, 0);}
   if(b.x+P.R>TW) {b.x=TW-P.R; bounce(-1, 0);}
@@ -436,7 +422,7 @@ function resolveCushion(b){
   if(b.y+P.R>TH) {b.y=TH-P.R; bounce( 0,-1);}
 }
 
-function resolveBallBall(a,b){
+function resolveBallBall(a,b,silent){
   const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy);
   if(dist>=P.R*2||dist<.001) return;
   if(firstHit===null){if(a.type==='cue')firstHit=b;else if(b.type==='cue')firstHit=a;}
@@ -462,20 +448,20 @@ function resolveBallBall(a,b){
   const imp=Math.abs(dv_n);
   a.spr.wobAmp=Math.min(.28,imp*.06);a.spr.wobAng=Math.atan2(-ny,-nx);a.spr.wob=0;
   b.spr.wobAmp=Math.min(.28,imp*.06);b.spr.wobAng=Math.atan2(ny,nx);b.spr.wob=0;
-  if(imp>.4) snd_clack(imp);
+  if(!silent&&imp>.4) snd_clack(imp);
 }
 
-function step(){
+function step(silent){
   const dt=P.DT/P.SUBS;
   for(let sub=0;sub<P.SUBS;sub++){
     for(const b of balls){if(b.onTable)stepBall(b,dt);}
-    for(const b of balls){if(b.onTable)resolveCushion(b);}
+    for(const b of balls){if(b.onTable)resolveCushion(b,silent);}
     for(let pass=0;pass<2;pass++){
       for(let i=0;i<balls.length;i++){
         if(!balls[i].onTable)continue;
         for(let j=i+1;j<balls.length;j++){
           if(!balls[j].onTable)continue;
-          resolveBallBall(balls[i],balls[j]);
+          resolveBallBall(balls[i],balls[j],silent);
         }
       }
     }
@@ -484,11 +470,18 @@ function step(){
       for(const pk of POCKETS){
         if(Math.hypot(b.x-pk.x,b.y-pk.y)<POCKET_R){
           b.onTable=false;b.vx=0;b.vy=0;b.wx=0;b.wy=0;
-          pottedShot.push(b);snd_pocket();break;
+          pottedShot.push(b);if(!silent)snd_pocket();break;
         }
       }
     }
   }
+}
+
+function fastForward(){
+  if(phase!=='rolling')return;
+  let safety=0;
+  while(isMoving()&&safety<5000){step(true);safety++;}
+  phase='done';
 }
 
 // ════════════════════════════════════════════════════════════
@@ -876,6 +869,7 @@ function handlePointerMove(sx,sy){
 }
 function handlePointerDown(){
   getAC();
+  if(phase==='rolling'){fastForward();return;}
   if(phase==='aiming')charging=true;
   if(phase==='placing'){
     phase='aiming';foulMsg='';
