@@ -1155,11 +1155,7 @@ function drawPlacing(){
 }
 
 // UI
-function updateUI(){
-  document.getElementById('status-text').textContent=foulMsg||turnMsg;
-  document.getElementById('p1-info').style.opacity=curP===0?'1':'0.5';
-  document.getElementById('p2-info').style.opacity=curP===1?'1':'0.5';
-}
+function updateUI(){\n  document.getElementById('status-text').textContent=foulMsg||turnMsg;\n  document.getElementById('p1-info').style.opacity=curP===0?'1':'0.5';\n  document.getElementById('p2-info').style.opacity=curP===1?'1':'0.5';\n  canvas.style.cursor = phase==='placing' ? 'grab' : 'default';\n}
 
 function updPow(){
   const pct=Math.round(power);
