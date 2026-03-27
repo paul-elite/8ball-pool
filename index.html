@@ -256,16 +256,166 @@ function updateTimer(){
   document.getElementById('timer').textContent=m+':'+s;
 }
 
-// Audio
+// Audio - Realistic synthesized pool sounds
 let _ac=null,_lim=null;
 function getAC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();if(_ac.state==='suspended')_ac.resume();return _ac;}
-function getOut(){const ac=getAC();if(!_lim){_lim=ac.createDynamicsCompressor();_lim.threshold.value=-3;_lim.knee.value=3;_lim.ratio.value=12;_lim.attack.value=0.001;_lim.release.value=0.08;_lim.connect(ac.destination);}return _lim;}
-function snd_strike(pct){const ac=getAC(),t=ac.currentTime,v=0.12+pct*0.006;const o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(120+pct*2,t);o.frequency.exponentialRampToValueAtTime(50,t+.15);const g=ac.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.2);o.connect(g);g.connect(getOut());o.start(t);o.stop(t+.2);}
+function getOut(){
+  const ac=getAC();
+  if(!_lim){
+    _lim=ac.createDynamicsCompressor();
+    _lim.threshold.value=-6;_lim.knee.value=6;_lim.ratio.value=8;
+    _lim.attack.value=0.002;_lim.release.value=0.1;
+    _lim.connect(ac.destination);
+  }
+  return _lim;
+}
+
+// Create noise buffer for impact transients
+function createNoiseBuffer(ac,duration){
+  const sr=ac.sampleRate,len=sr*duration,buf=ac.createBuffer(1,len,sr),data=buf.getChannelData(0);
+  for(let i=0;i<len;i++)data[i]=(Math.random()*2-1);
+  return buf;
+}
+
+// Cue strike - leather tip click + wood resonance + ball contact
+function snd_strike(pct){
+  const ac=getAC(),t=ac.currentTime,v=0.15+pct*0.003;
+
+  // Sharp leather tip click (high freq noise burst)
+  const noiseBuf=createNoiseBuffer(ac,0.03);
+  const noise=ac.createBufferSource();noise.buffer=noiseBuf;
+  const noiseFilter=ac.createBiquadFilter();noiseFilter.type='bandpass';noiseFilter.frequency.value=4000;noiseFilter.Q.value=2;
+  const noiseGain=ac.createGain();noiseGain.gain.setValueAtTime(v*0.8,t);noiseGain.gain.exponentialRampToValueAtTime(0.001,t+0.025);
+  noise.connect(noiseFilter);noiseFilter.connect(noiseGain);noiseGain.connect(getOut());
+  noise.start(t);noise.stop(t+0.03);
+
+  // Wood shaft thump
+  const shaft=ac.createOscillator();shaft.type='triangle';
+  shaft.frequency.setValueAtTime(200+pct,t);shaft.frequency.exponentialRampToValueAtTime(80,t+0.08);
+  const shaftGain=ac.createGain();shaftGain.gain.setValueAtTime(v*0.5,t+0.003);shaftGain.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+  shaft.connect(shaftGain);shaftGain.connect(getOut());
+  shaft.start(t+0.003);shaft.stop(t+0.1);
+
+  // Ball resonance (phenolic resin ball character)
+  const ball=ac.createOscillator();ball.type='sine';
+  ball.frequency.setValueAtTime(1800+pct*10,t+0.001);
+  const ballGain=ac.createGain();ballGain.gain.setValueAtTime(v*0.3,t+0.001);ballGain.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+  ball.connect(ballGain);ballGain.connect(getOut());
+  ball.start(t+0.001);ball.stop(t+0.06);
+
+  // Low body thud
+  const body=ac.createOscillator();body.type='sine';
+  body.frequency.setValueAtTime(90,t+0.005);body.frequency.exponentialRampToValueAtTime(45,t+0.12);
+  const bodyGain=ac.createGain();bodyGain.gain.setValueAtTime(v*0.6,t+0.005);bodyGain.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+  body.connect(bodyGain);bodyGain.connect(getOut());
+  body.start(t+0.005);body.stop(t+0.15);
+}
+
+// Ball-ball collision - sharp phenolic click with multiple resonances
 let _tc=0;
-function snd_clack(imp){const ac=getAC(),t=ac.currentTime;if(t-_tc<.02)return;_tc=t;const v=Math.min(.7,imp*.05);const o=ac.createOscillator();o.type='sine';o.frequency.value=2500+imp*100;const g=ac.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.connect(g);g.connect(getOut());o.start(t);o.stop(t+.06);}
+function snd_clack(imp){
+  const ac=getAC(),t=ac.currentTime;
+  if(t-_tc<0.015)return;_tc=t;
+  const v=Math.min(0.6,imp*0.04);
+
+  // Sharp transient click (noise burst)
+  const noiseBuf=createNoiseBuffer(ac,0.02);
+  const noise=ac.createBufferSource();noise.buffer=noiseBuf;
+  const noiseFilter=ac.createBiquadFilter();noiseFilter.type='highpass';noiseFilter.frequency.value=3000+imp*200;
+  const noiseGain=ac.createGain();noiseGain.gain.setValueAtTime(v*0.7,t);noiseGain.gain.exponentialRampToValueAtTime(0.001,t+0.015);
+  noise.connect(noiseFilter);noiseFilter.connect(noiseGain);noiseGain.connect(getOut());
+  noise.start(t);noise.stop(t+0.02);
+
+  // Primary resonance (ball material)
+  const freqs=[2200,3400,4800];
+  freqs.forEach((freq,i)=>{
+    const osc=ac.createOscillator();osc.type='sine';
+    osc.frequency.value=freq+imp*30;
+    const gain=ac.createGain();
+    gain.gain.setValueAtTime(v*(0.25-i*0.06),t+0.001);
+    gain.gain.exponentialRampToValueAtTime(0.001,t+0.04+i*0.01);
+    osc.connect(gain);gain.connect(getOut());
+    osc.start(t+0.001);osc.stop(t+0.06);
+  });
+
+  // Low impact thud
+  if(imp>2){
+    const thud=ac.createOscillator();thud.type='sine';
+    thud.frequency.setValueAtTime(150+imp*5,t);thud.frequency.exponentialRampToValueAtTime(70,t+0.05);
+    const thudGain=ac.createGain();thudGain.gain.setValueAtTime(v*0.4,t);thudGain.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+    thud.connect(thudGain);thudGain.connect(getOut());
+    thud.start(t);thud.stop(t+0.07);
+  }
+}
+
+// Cushion hit - rubber dampened thump with cloth friction
 let _tcu=0;
-function snd_cushion(imp){const ac=getAC(),t=ac.currentTime;if(t-_tcu<.03)return;_tcu=t;const v=Math.min(.6,imp*.04);const o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(60,t+.1);const g=ac.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.15);o.connect(g);g.connect(getOut());o.start(t);o.stop(t+.15);}
-function snd_pocket(){const ac=getAC(),t=ac.currentTime;const o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(100,t);o.frequency.exponentialRampToValueAtTime(40,t+.2);const g=ac.createGain();g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.0001,t+.25);o.connect(g);g.connect(getOut());o.start(t);o.stop(t+.25);}
+function snd_cushion(imp){
+  const ac=getAC(),t=ac.currentTime;
+  if(t-_tcu<0.025)return;_tcu=t;
+  const v=Math.min(0.5,imp*0.035);
+
+  // Rubber thump (low, dampened)
+  const rubber=ac.createOscillator();rubber.type='sine';
+  rubber.frequency.setValueAtTime(120+imp*8,t);rubber.frequency.exponentialRampToValueAtTime(50,t+0.1);
+  const rubberGain=ac.createGain();rubberGain.gain.setValueAtTime(v*0.7,t);rubberGain.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+  rubber.connect(rubberGain);rubberGain.connect(getOut());
+  rubber.start(t);rubber.stop(t+0.12);
+
+  // Cloth friction noise
+  const noiseBuf=createNoiseBuffer(ac,0.06);
+  const noise=ac.createBufferSource();noise.buffer=noiseBuf;
+  const noiseFilter=ac.createBiquadFilter();noiseFilter.type='bandpass';noiseFilter.frequency.value=800;noiseFilter.Q.value=1;
+  const noiseGain=ac.createGain();noiseGain.gain.setValueAtTime(v*0.25,t+0.01);noiseGain.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+  noise.connect(noiseFilter);noiseFilter.connect(noiseGain);noiseGain.connect(getOut());
+  noise.start(t+0.01);noise.stop(t+0.06);
+
+  // Wood rail resonance
+  const rail=ac.createOscillator();rail.type='triangle';
+  rail.frequency.setValueAtTime(280,t+0.005);rail.frequency.exponentialRampToValueAtTime(180,t+0.08);
+  const railGain=ac.createGain();railGain.gain.setValueAtTime(v*0.3,t+0.005);railGain.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+  rail.connect(railGain);railGain.connect(getOut());
+  rail.start(t+0.005);rail.stop(t+0.1);
+}
+
+// Pocket - ball dropping with leather/felt pocket + rolling rumble
+function snd_pocket(){
+  const ac=getAC(),t=ac.currentTime;
+
+  // Initial drop impact
+  const drop=ac.createOscillator();drop.type='sine';
+  drop.frequency.setValueAtTime(180,t);drop.frequency.exponentialRampToValueAtTime(60,t+0.15);
+  const dropGain=ac.createGain();dropGain.gain.setValueAtTime(0.4,t+0.04);dropGain.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+  drop.connect(dropGain);dropGain.connect(getOut());
+  drop.start(t+0.04);drop.stop(t+0.2);
+
+  // Leather pocket flap
+  const noiseBuf=createNoiseBuffer(ac,0.1);
+  const noise=ac.createBufferSource();noise.buffer=noiseBuf;
+  const noiseFilter=ac.createBiquadFilter();noiseFilter.type='lowpass';noiseFilter.frequency.value=600;
+  const noiseGain=ac.createGain();noiseGain.gain.setValueAtTime(0.15,t+0.03);noiseGain.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+  noise.connect(noiseFilter);noiseFilter.connect(noiseGain);noiseGain.connect(getOut());
+  noise.start(t+0.03);noise.stop(t+0.12);
+
+  // Ball rolling in return chute (rumble)
+  const rumbleNoise=createNoiseBuffer(ac,0.4);
+  const rumble=ac.createBufferSource();rumble.buffer=rumbleNoise;
+  const rumbleFilter=ac.createBiquadFilter();rumbleFilter.type='lowpass';rumbleFilter.frequency.setValueAtTime(300,t+0.1);rumbleFilter.frequency.linearRampToValueAtTime(150,t+0.45);
+  const rumbleGain=ac.createGain();
+  rumbleGain.gain.setValueAtTime(0.001,t+0.1);
+  rumbleGain.gain.linearRampToValueAtTime(0.2,t+0.15);
+  rumbleGain.gain.linearRampToValueAtTime(0.15,t+0.3);
+  rumbleGain.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+  rumble.connect(rumbleFilter);rumbleFilter.connect(rumbleGain);rumbleGain.connect(getOut());
+  rumble.start(t+0.1);rumble.stop(t+0.5);
+
+  // Final drop into collection
+  const finalDrop=ac.createOscillator();finalDrop.type='sine';
+  finalDrop.frequency.setValueAtTime(100,t+0.35);finalDrop.frequency.exponentialRampToValueAtTime(40,t+0.5);
+  const finalGain=ac.createGain();finalGain.gain.setValueAtTime(0.25,t+0.35);finalGain.gain.exponentialRampToValueAtTime(0.001,t+0.55);
+  finalDrop.connect(finalGain);finalGain.connect(getOut());
+  finalDrop.start(t+0.35);finalDrop.stop(t+0.55);
+}
 
 // Physics
 function isMoving(){return balls.some(b=>b.onTable&&(Math.hypot(b.vx,b.vy)>P.MIN_V||Math.abs(b.wx)>P.MIN_W||Math.abs(b.wy)>P.MIN_W));}
