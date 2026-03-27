@@ -1023,7 +1023,7 @@ window.addEventListener('mouseup',()=>{spinDrag=false;spinDragEl=null;});
 function chargePwr(){if(!charging)return;power=Math.min(100,power+1.6);updPow();}
 
 // ════════════════════════════════════════════════════════════
-//  AI PLAYER
+//  AI PLAYER (Advanced)
 // ════════════════════════════════════════════════════════════
 function getValidTargets(){
   const mg=myGroup();
@@ -1033,83 +1033,263 @@ function getValidTargets(){
   return balls.filter(b=>b.onTable&&b.type!=='cue'&&b.type!=='eight');
 }
 
-function lineHitsBall(x1,y1,x2,y2,bx,by,ignore){
-  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
-  if(len<1)return false;
-  const nx=dx/len,ny=dy/len;
+function getFirstHitBall(fromX,fromY,angle,ignore){
+  const dx=Math.cos(angle),dy=Math.sin(angle);
+  let closest=null,minDist=Infinity;
   for(const b of balls){
-    if(!b.onTable||b===ignore||b===cueBall)continue;
+    if(!b.onTable||b===cueBall||b===ignore)continue;
+    const px=b.x-fromX,py=b.y-fromY;
+    const proj=px*dx+py*dy;
+    if(proj<0)continue;
+    const perpX=px-proj*dx,perpY=py-proj*dy;
+    const perp=Math.hypot(perpX,perpY);
+    if(perp<BR*2&&proj<minDist){minDist=proj;closest=b;}
+  }
+  return closest;
+}
+
+function lineHitsBall(x1,y1,x2,y2,ignore1,ignore2){
+  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
+  if(len<1)return null;
+  const nx=dx/len,ny=dy/len;
+  let closest=null,minProj=Infinity;
+  for(const b of balls){
+    if(!b.onTable||b===ignore1||b===ignore2||b===cueBall)continue;
     const px=b.x-x1,py=b.y-y1;
     const proj=px*nx+py*ny;
     if(proj<0||proj>len)continue;
     const perpX=px-proj*nx,perpY=py-proj*ny;
-    if(Math.hypot(perpX,perpY)<BR*2)return true;
+    if(Math.hypot(perpX,perpY)<BR*2&&proj<minProj){minProj=proj;closest=b;}
+  }
+  return closest;
+}
+
+function willScratch(ghostX,ghostY,angle,power){
+  // Predict if cue ball might go into a pocket after hit
+  const speed=power*0.01*MAX_POWER*0.3;
+  let cx=ghostX,cy=ghostY;
+  const dx=Math.cos(angle)*speed*0.5,dy=Math.sin(angle)*speed*0.5;
+  for(let i=0;i<20;i++){
+    cx+=dx;cy+=dy;
+    if(cx<0||cx>TW||cy<0||cy>TH)return false;
+    for(const pk of POCKETS){
+      if(Math.hypot(cx-pk.x,cy-pk.y)<POCKET_R*1.5)return true;
+    }
   }
   return false;
+}
+
+function predictCueBallPosition(ghostX,ghostY,targetX,targetY,angle,power){
+  // Simple prediction of where cue ball goes after contact
+  const hitAngle=Math.atan2(targetY-ghostY,targetX-ghostX);
+  const deflect=angle-hitAngle;
+  const newAngle=hitAngle+Math.PI/2*(deflect>0?1:-1)*0.8;
+  const dist=power*0.4;
+  return{x:ghostX+Math.cos(newAngle)*dist,y:ghostY+Math.sin(newAngle)*dist};
+}
+
+function evaluatePosition(pos){
+  // Score based on table position (center is good, near pockets is bad)
+  let score=50;
+  const cx=TW/2,cy=TH/2;
+  score-=Math.hypot(pos.x-cx,pos.y-cy)*0.02;
+  for(const pk of POCKETS){
+    const d=Math.hypot(pos.x-pk.x,pos.y-pk.y);
+    if(d<POCKET_R*3)score-=30;
+  }
+  if(pos.x<BR*2||pos.x>TW-BR*2||pos.y<BR*2||pos.y>TH-BR*2)score-=20;
+  return score;
 }
 
 function evaluateShot(target,pocket){
   const dx=pocket.x-target.x,dy=pocket.y-target.y;
   const distToPocket=Math.hypot(dx,dy);
   const angToPocket=Math.atan2(dy,dx);
-  // Ghost ball position
+  // Ghost ball position (where cue ball needs to hit)
   const ghostX=target.x-Math.cos(angToPocket)*BR*2;
   const ghostY=target.y-Math.sin(angToPocket)*BR*2;
   const distCueToGhost=Math.hypot(ghostX-cueBall.x,ghostY-cueBall.y);
+  if(distCueToGhost<BR*2.2)return null; // Too close
   // Check clear path cue->ghost
-  if(lineHitsBall(cueBall.x,cueBall.y,ghostX,ghostY,target.x,target.y,target))return null;
+  if(lineHitsBall(cueBall.x,cueBall.y,ghostX,ghostY,target,null))return null;
   // Check clear path target->pocket
-  if(lineHitsBall(target.x,target.y,pocket.x,pocket.y,0,0,target))return null;
-  // Angle quality (straighter is better)
+  if(lineHitsBall(target.x,target.y,pocket.x,pocket.y,target,null))return null;
+  // Angle quality
   const cueAng=Math.atan2(ghostY-cueBall.y,ghostX-cueBall.x);
   const cutAngle=Math.abs(Math.atan2(Math.sin(angToPocket-cueAng),Math.cos(angToPocket-cueAng)));
-  if(cutAngle>Math.PI*0.7)return null; // Too sharp
-  const score=1000-distToPocket*0.5-distCueToGhost*0.3-cutAngle*200;
-  return{target,pocket,ghostX,ghostY,angle:cueAng,score,power:Math.min(85,30+distCueToGhost*0.15+distToPocket*0.1)};
+  if(cutAngle>Math.PI*0.65)return null; // Too sharp
+  // Calculate power needed
+  const basePower=25+distCueToGhost*0.08+distToPocket*0.06;
+  const cutPenalty=cutAngle*15;
+  const power=Math.min(90,Math.max(25,basePower+cutPenalty));
+  // Check for scratch
+  const scratchRisk=willScratch(ghostX,ghostY,cueAng+Math.PI,power)?-150:0;
+  // Position play bonus
+  const nextPos=predictCueBallPosition(ghostX,ghostY,target.x,target.y,cueAng,power);
+  const posScore=evaluatePosition(nextPos);
+  // Pocket preference (corner pockets easier)
+  const cornerBonus=(pocket.y===0||pocket.y===TH)?20:0;
+  // Distance penalty (shorter shots are better)
+  const distPenalty=distToPocket*0.3+distCueToGhost*0.2;
+  // Cut angle penalty
+  const anglePenalty=cutAngle*150;
+  const score=800-distPenalty-anglePenalty+cornerBonus+posScore+scratchRisk;
+  // Calculate optimal spin
+  const spinAmt=Math.min(0.7,cutAngle*0.5);
+  const spinDir=((cueAng-angToPocket+Math.PI*3)%(Math.PI*2))-Math.PI;
+  return{target,pocket,ghostX,ghostY,angle:cueAng,score,power,
+    spinX:spinDir>0?spinAmt:-spinAmt,spinY:-0.2+Math.random()*0.1};
 }
 
-function findBestShot(){
-  const targets=getValidTargets();
+function evaluateBankShot(target,pocket){
+  // Try simple one-rail bank shots
+  const banks=[];
+  // Bank off top rail
+  const mirrorY1=-target.y;
+  const ang1=Math.atan2(pocket.y-mirrorY1,pocket.x-target.x);
+  const hitY1=0;
+  const hitX1=target.x+(hitY1-target.y)/Math.tan(ang1);
+  if(hitX1>BR&&hitX1<TW-BR)banks.push({hitX:hitX1,hitY:hitY1,type:'top'});
+  // Bank off bottom rail
+  const mirrorY2=TH*2-target.y;
+  const ang2=Math.atan2(pocket.y-mirrorY2,pocket.x-target.x);
+  const hitY2=TH;
+  const hitX2=target.x+(hitY2-target.y)/Math.tan(ang2);
+  if(hitX2>BR&&hitX2<TW-BR)banks.push({hitX:hitX2,hitY:hitY2,type:'bottom'});
+
   let best=null;
-  for(const t of targets){
-    for(const pk of POCKETS){
-      const shot=evaluateShot(t,pk);
-      if(shot&&(!best||shot.score>best.score))best=shot;
-    }
-  }
-  // Fallback: just hit any valid ball
-  if(!best&&targets.length>0){
-    const t=targets[0];
-    const ang=Math.atan2(t.y-cueBall.y,t.x-cueBall.x);
-    best={target:t,angle:ang,power:40,score:0};
+  for(const bank of banks){
+    const ghostAng=Math.atan2(bank.hitY-target.y,bank.hitX-target.x);
+    const ghostX=target.x-Math.cos(ghostAng)*BR*2;
+    const ghostY=target.y-Math.sin(ghostAng)*BR*2;
+    const distCue=Math.hypot(ghostX-cueBall.x,ghostY-cueBall.y);
+    if(lineHitsBall(cueBall.x,cueBall.y,ghostX,ghostY,target,null))continue;
+    if(lineHitsBall(target.x,target.y,bank.hitX,bank.hitY,target,null))continue;
+    const cueAng=Math.atan2(ghostY-cueBall.y,ghostX-cueBall.x);
+    const power=Math.min(85,45+distCue*0.1);
+    const score=400-distCue*0.5;
+    if(!best||score>best.score)best={target,pocket,ghostX,ghostY,angle:cueAng,score,power,spinX:0,spinY:0,isBank:true};
   }
   return best;
 }
 
+function evaluateSafetyShot(){
+  // Find a shot that leaves cue ball safe and opponent's balls difficult
+  const targets=getValidTargets();
+  let best=null;
+  for(const t of targets){
+    const ang=Math.atan2(t.y-cueBall.y,t.x-cueBall.x);
+    const dist=Math.hypot(t.x-cueBall.x,t.y-cueBall.y);
+    // Soft hit to move ball but stay safe
+    const power=Math.min(35,20+dist*0.03);
+    // Predict where cue ends up
+    const endX=cueBall.x+Math.cos(ang)*dist*0.3;
+    const endY=cueBall.y+Math.sin(ang)*dist*0.3;
+    let safeScore=100;
+    // Prefer ending near a rail
+    if(endX<100||endX>TW-100)safeScore+=30;
+    if(endY<100||endY>TH-100)safeScore+=30;
+    // Avoid pockets
+    for(const pk of POCKETS){
+      if(Math.hypot(endX-pk.x,endY-pk.y)<POCKET_R*4)safeScore-=50;
+    }
+    if(!best||safeScore>best.score)best={target:t,angle:ang,power,score:safeScore-200,spinX:0,spinY:0.5,isSafety:true};
+  }
+  return best;
+}
+
+function findBestShot(){
+  const targets=getValidTargets();
+  let allShots=[];
+  // Direct shots
+  for(const t of targets){
+    for(const pk of POCKETS){
+      const shot=evaluateShot(t,pk);
+      if(shot)allShots.push(shot);
+    }
+  }
+  // Bank shots (only if no good direct shots)
+  if(allShots.length<2){
+    for(const t of targets){
+      for(const pk of POCKETS){
+        const bank=evaluateBankShot(t,pk);
+        if(bank)allShots.push(bank);
+      }
+    }
+  }
+  // Safety shot as fallback
+  const safety=evaluateSafetyShot();
+  if(safety)allShots.push(safety);
+  // Sort by score
+  allShots.sort((a,b)=>b.score-a.score);
+  // Add slight randomness to top choices
+  if(allShots.length>2){
+    const top=allShots.slice(0,3);
+    const weights=top.map((s,i)=>Math.max(1,s.score-top[top.length-1].score+10));
+    const total=weights.reduce((a,b)=>a+b,0);
+    let r=Math.random()*total;
+    for(let i=0;i<top.length;i++){
+      r-=weights[i];
+      if(r<=0)return top[i];
+    }
+  }
+  return allShots[0]||null;
+}
+
+function findBestPlacement(){
+  let bestPos={x:BAULK_X-D_RADIUS*0.5,y:TH*0.5},bestScore=-Infinity;
+  const targets=getValidTargets();
+  // Try various positions
+  const positions=freeBall?
+    [{x:TW*0.25,y:TH*0.5},{x:TW*0.5,y:TH*0.5},{x:TW*0.75,y:TH*0.5},{x:TW*0.25,y:TH*0.25},{x:TW*0.25,y:TH*0.75}]:
+    [{x:BAULK_X-D_RADIUS*0.5,y:TH*0.5},{x:BAULK_X-D_RADIUS*0.3,y:TH*0.35},{x:BAULK_X-D_RADIUS*0.3,y:TH*0.65}];
+
+  for(const pos of positions){
+    // Check not overlapping
+    let valid=true;
+    for(const b of balls){
+      if(b.onTable&&b!==cueBall&&Math.hypot(b.x-pos.x,b.y-pos.y)<BR*2.5){valid=false;break;}
+    }
+    if(!valid)continue;
+    // Score based on shot opportunities from this position
+    let score=0;
+    for(const t of targets){
+      for(const pk of POCKETS){
+        const dist=Math.hypot(t.x-pos.x,t.y-pos.y);
+        const angToPk=Math.atan2(pk.y-t.y,pk.x-t.x);
+        const ghostX=t.x-Math.cos(angToPk)*BR*2;
+        const ghostY=t.y-Math.sin(angToPk)*BR*2;
+        const blocked=lineHitsBall(pos.x,pos.y,ghostX,ghostY,t,null);
+        if(!blocked)score+=100-dist*0.1;
+      }
+    }
+    if(score>bestScore){bestScore=score;bestPos=pos;}
+  }
+  return bestPos;
+}
+
 function aiTakeTurn(){
   if(phase==='placing'){
-    // Place cue ball in good position
-    if(freeBall){
-      cueBall.x=BAULK_X;cueBall.y=TH*0.5;
-    }else{
-      cueBall.x=BAULK_X-D_RADIUS*0.5;cueBall.y=TH*0.5;
-    }
+    const pos=findBestPlacement();
+    cueBall.x=pos.x;cueBall.y=pos.y;
     phase='aiming';foulMsg='';
     const mg=myGroup(),ne=needEight();
-    turnMsg=`Player ${curP+1} — pot ${openTable?'any ball':ne?'8-ball':`${mg}s`}`;
+    turnMsg=`CPU thinking...`;
     extraMsg='';updateUI();
-    aiDelay=30;aiThinking=true;
+    aiDelay=25;aiThinking=true;
     return;
   }
   const shot=findBestShot();
   if(shot){
     aimAngle=shot.angle;
     power=shot.power;updPow();
+    spinX=shot.spinX||0;
+    spinY=shot.spinY||0;
+    drawSpin();
     shoot();
   }else{
-    // Random shot as last resort
     aimAngle=Math.random()*Math.PI*2;
-    power=50;updPow();
+    power=40;updPow();
     shoot();
   }
   aiThinking=false;
@@ -1122,7 +1302,8 @@ function aiUpdate(){
     if(aiDelay<=0)aiTakeTurn();
   }else if(phase==='aiming'||phase==='placing'){
     aiThinking=true;
-    aiDelay=40; // Thinking delay
+    aiDelay=35;
+    turnMsg='CPU thinking...';updateUI();
   }
 }
 
