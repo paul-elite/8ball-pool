@@ -102,10 +102,13 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 #right-panel{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;}
 #power-meter{width:28px;height:200px;background:var(--bg-dark);border:2px solid var(--border);border-radius:6px;display:flex;flex-direction:column-reverse;overflow:hidden;padding:3px;gap:2px;}
 .power-segment{flex:1;border-radius:2px;background:#333;transition:background .05s;}
-.power-segment.active.green{background:#4a8;}
-.power-segment.active.yellow{background:#ca0;}
-.power-segment.active.orange{background:#f80;}
-.power-segment.active.red{background:#e44;}
+.power-segment.active.c1{background:#0654FB;}
+.power-segment.active.c2{background:#28A3FB;}
+.power-segment.active.c3{background:#0AE4C0;}
+.power-segment.active.c4{background:#23C217;}
+.power-segment.active.c5{background:#FAC526;}
+.power-segment.active.c6{background:#FC9424;}
+.power-segment.active.c7{background:#EF2626;}
 #power-value{font-size:11px;color:var(--dim);}
 
 /* Table Container */
@@ -351,10 +354,13 @@ const powerMeter=document.getElementById('power-meter');
 for(let i=0;i<20;i++){
   const seg=document.createElement('div');
   seg.className='power-segment';
-  if(i<6)seg.dataset.color='green';
-  else if(i<12)seg.dataset.color='yellow';
-  else if(i<16)seg.dataset.color='orange';
-  else seg.dataset.color='red';
+  if(i<3)seg.dataset.color='c1';
+  else if(i<6)seg.dataset.color='c2';
+  else if(i<9)seg.dataset.color='c3';
+  else if(i<12)seg.dataset.color='c4';
+  else if(i<15)seg.dataset.color='c5';
+  else if(i<18)seg.dataset.color='c6';
+  else seg.dataset.color='c7';
   powerMeter.appendChild(seg);
 }
 const powerSegs=[...powerMeter.querySelectorAll('.power-segment')];
@@ -1108,7 +1114,7 @@ function updPow(){
     if(i<activeCount){
       seg.classList.add('active',seg.dataset.color);
     }else{
-      seg.classList.remove('active','green','yellow','orange','red');
+      seg.classList.remove('active','c1','c2','c3','c4','c5','c6','c7');
     }
   });
 }
