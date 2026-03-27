@@ -635,7 +635,7 @@ function afterShot(){
 function lc(hex,a){const c=parseInt(hex.slice(1),16);return`rgb(${Math.min(255,(c>>16)+a)},${Math.min(255,((c>>8)&255)+a)},${Math.min(255,(c&255)+a)})`;}
 function dc(hex,a){const c=parseInt(hex.slice(1),16);return`rgb(${Math.max(0,(c>>16)-a)},${Math.max(0,((c>>8)&255)-a)},${Math.max(0,(c&255)-a)})`;}
 
-let tableCache = null;
+var tableCache = null;
 
 function generateTableCache() {
   const s=S(), W=canvas.width, H=canvas.height;
