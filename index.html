@@ -264,6 +264,7 @@ function resize(){
   cueCanvas.style.left=-pad+'px';
   cueCanvas.style.top=-pad+'px';
   cueCanvas.dataset.pad=pad;
+  tableCache=null;
 }
 resize();window.addEventListener('resize',resize);
 const S=()=>parseFloat(canvas.dataset.s);
