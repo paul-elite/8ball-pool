@@ -407,41 +407,15 @@ function snd_clack(imp){
   }
 }
 
-// Create noise buffer for impact transients
-function createNoiseBuffer(ac,duration){
-  const sr=ac.sampleRate,len=sr*duration,buf=ac.createBuffer(1,len,sr),data=buf.getChannelData(0);
-  for(let i=0;i<len;i++)data[i]=(Math.random()*2-1);
-  return buf;
-}
-
-// Cushion hit - rubber dampened thump with cloth friction
 let _tcu=0;
 function snd_cushion(imp){
   const ac=getAC(),t=ac.currentTime;
   if(t-_tcu<0.025)return;_tcu=t;
-  const v=Math.min(0.5,imp*0.035);
-
-  // Rubber thump (low, dampened)
-  const rubber=ac.createOscillator();rubber.type='sine';
-  rubber.frequency.setValueAtTime(120+imp*8,t);rubber.frequency.exponentialRampToValueAtTime(50,t+0.1);
-  const rubberGain=ac.createGain();rubberGain.gain.setValueAtTime(v*0.7,t);rubberGain.gain.exponentialRampToValueAtTime(0.001,t+0.12);
-  rubber.connect(rubberGain);rubberGain.connect(getOut());
-  rubber.start(t);rubber.stop(t+0.12);
-
-  // Cloth friction noise
-  const noiseBuf=createNoiseBuffer(ac,0.06);
-  const noise=ac.createBufferSource();noise.buffer=noiseBuf;
-  const noiseFilter=ac.createBiquadFilter();noiseFilter.type='bandpass';noiseFilter.frequency.value=800;noiseFilter.Q.value=1;
-  const noiseGain=ac.createGain();noiseGain.gain.setValueAtTime(v*0.25,t+0.01);noiseGain.gain.exponentialRampToValueAtTime(0.001,t+0.05);
-  noise.connect(noiseFilter);noiseFilter.connect(noiseGain);noiseGain.connect(getOut());
-  noise.start(t+0.01);noise.stop(t+0.06);
-
-  // Wood rail resonance
-  const rail=ac.createOscillator();rail.type='triangle';
-  rail.frequency.setValueAtTime(280,t+0.005);rail.frequency.exponentialRampToValueAtTime(180,t+0.08);
-  const railGain=ac.createGain();railGain.gain.setValueAtTime(v*0.3,t+0.005);railGain.gain.exponentialRampToValueAtTime(0.001,t+0.1);
-  rail.connect(railGain);railGain.connect(getOut());
-  rail.start(t+0.005);rail.stop(t+0.1);
+  if(sfx.cushion){
+    const source=ac.createBufferSource();source.buffer=sfx.cushion;
+    const gain=ac.createGain();gain.gain.value=Math.min(1.0, 0.4 + imp*0.04);
+    source.connect(gain);gain.connect(getOut());source.start();
+  }
 }
 
 let _tp=0;
