@@ -1141,34 +1141,32 @@ function drawCue(){
   cueCtx.strokeStyle=g;cueCtx.lineWidth=4*s;cueCtx.lineCap='round';cueCtx.stroke();
   cueCtx.beginPath();cueCtx.arc(tx,ty,2.5*s,0,Math.PI*2);cueCtx.fillStyle='#5090b0';cueCtx.fill();
 
-  // Mini power bar hovering above the cue stick
+  // Mini power bar hovering above the cue ball
   if(charging || power > 0){
-    const barLen = 60*s, barH = 6*s;
-    const perpX = -dy, perpY = dx; // Perpendicular to cue
-    const midX = (tx+bx)/2, midY = (ty+by)/2;
-    const mbx = midX + perpX*14*s, mby = midY + perpY*14*s;
+    const barLen = 50*s, barH = 5*s;
+    const ballPos = tc(cueBall.x, cueBall.y);
+    const mbx = ballPos.x + pad, mby = ballPos.y + pad - BR*s - 12*s;
     
     // Background
     cueCtx.save();
-    cueCtx.translate(mbx, mby);
-    cueCtx.rotate(aimAngle);
-    cueCtx.fillStyle='rgba(0,0,0,0.5)';
+    cueCtx.fillStyle='rgba(0,0,0,0.55)';
     cueCtx.beginPath();
-    cueCtx.roundRect(-barLen/2, -barH/2, barLen, barH, barH/2);
+    cueCtx.roundRect(mbx - barLen/2, mby - barH/2, barLen, barH, barH/2);
     cueCtx.fill();
     
-    // Fill
+    // Fill with full gradient matching the power meter
     const pct = power/100;
     const fillW = barLen * pct;
-    if(fillW > 0){
+    if(fillW > 1){
       const colors = ['#0654FB','#28A3FB','#0AE4C0','#23C217','#FAC526','#FC9424','#EF2626'];
-      const ci = Math.min(6, Math.floor(pct * 7));
-      const mg = cueCtx.createLinearGradient(-barLen/2,0,-barLen/2+fillW,0);
-      mg.addColorStop(0, colors[Math.max(0,ci-1)]);
-      mg.addColorStop(1, colors[ci]);
+      const mg = cueCtx.createLinearGradient(mbx - barLen/2, 0, mbx - barLen/2 + fillW, 0);
+      for(let i=0;i<colors.length;i++){
+        const stop = i/(colors.length-1);
+        if(stop <= 1) mg.addColorStop(Math.min(stop, 1), colors[i]);
+      }
       cueCtx.fillStyle = mg;
       cueCtx.beginPath();
-      cueCtx.roundRect(-barLen/2, -barH/2, fillW, barH, barH/2);
+      cueCtx.roundRect(mbx - barLen/2, mby - barH/2, fillW, barH, barH/2);
       cueCtx.fill();
     }
     cueCtx.restore();
