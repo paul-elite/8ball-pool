@@ -1228,7 +1228,7 @@ function loop(){
   chargePwr();aiUpdate();
   if(phase==='rolling'){
     rollFrames++;
-    if(rollFrames>240) fastForward(); // 4 second max simulation limit
+    if(rollFrames>420) fastForward(); // 7 second max simulation limit
     else{ for(let i=0;i<8;i++){step();if(!isMoving())break;} }
     if(!isMoving())phase='done';
   }
