@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>8-Ball Pool</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Geist:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Geist:wght@800&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#0a0a0a;--panel:#111;--border:#1e1e1e;--text:#e4ddd0;--dim:#5a544a;--gold:#c8a84b;--gold-d:#5a3f10;--danger:#e04444;}
 html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow:hidden;user-select:none;}
@@ -766,12 +766,12 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   // Draw number with 3D rolling effect - synced with stripe
   if(num>0&&visible){
     const numX=px+surfaceX,numY=py+surfaceY;
-    const fs=Math.max(8,Math.round(r*.75*scale));
-    const circleR=r*.38*scale;
+    const fs=Math.max(10,Math.round(r*.9*scale));
+    const circleR=r*.42*scale;
     const alpha=Math.min(1,surfaceZ*1.5).toFixed(2);
     ctx.beginPath();ctx.arc(numX,numY,circleR,0,Math.PI*2);
     ctx.fillStyle=`rgba(255,255,255,${alpha*.9})`;ctx.fill();
-    ctx.font=`900 ${fs}px "Geist",sans-serif`;
+    ctx.font=`800 ${fs}px "Geist",sans-serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillStyle=`rgba(0,0,0,${alpha})`;
     ctx.fillText(num,numX,numY);
@@ -795,19 +795,19 @@ function drawAllBalls(){
 function drawCue(){
   if(phase!=='aiming'||!cueBall||!cueBall.onTable)return;
   const s=S(),p=tc(cueBall.x,cueBall.y);
-  const pull=(8+(power/100)*55)*s,cueLen=210*s;
+  const pull=(8+(power/100)*80)*s,cueLen=TOTAL_W*s*0.9;
   const dx=Math.cos(aimAngle),dy=Math.sin(aimAngle);
   ctx.save();ctx.setLineDash([4*s,7*s]);
-  ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(p.x-dx*BR*s,p.y-dy*BR*s);ctx.lineTo(p.x-dx*290*s,p.y-dy*290*s);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(p.x-dx*BR*s,p.y-dy*BR*s);ctx.lineTo(p.x-dx*TOTAL_W*s,p.y-dy*TOTAL_W*s);ctx.stroke();
   ctx.setLineDash([]);ctx.restore();
   const tx=p.x+dx*(BR*s+pull),ty=p.y+dy*(BR*s+pull);
   const bx=tx+dx*cueLen,by=ty+dy*cueLen;
   const g=ctx.createLinearGradient(tx,ty,bx,by);
-  g.addColorStop(0,'#ddd0a0');g.addColorStop(.08,'#c0a060');g.addColorStop(.65,'#7a4a20');g.addColorStop(1,'#4a2808');
+  g.addColorStop(0,'#ddd0a0');g.addColorStop(.05,'#c0a060');g.addColorStop(.5,'#7a4a20');g.addColorStop(1,'#4a2808');
   ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(bx,by);
-  ctx.strokeStyle=g;ctx.lineWidth=3.5*s;ctx.lineCap='round';ctx.stroke();
-  ctx.beginPath();ctx.arc(tx,ty,2*s,0,Math.PI*2);ctx.fillStyle='#4a88aa';ctx.fill();
+  ctx.strokeStyle=g;ctx.lineWidth=4*s;ctx.lineCap='round';ctx.stroke();
+  ctx.beginPath();ctx.arc(tx,ty,2.5*s,0,Math.PI*2);ctx.fillStyle='#4a88aa';ctx.fill();
 }
 
 function drawPlacing(){
