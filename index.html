@@ -173,6 +173,7 @@ function mkBall(type,num,cIdx,stripe,x,y){
     vx:0,vy:0,   // linear velocity
     wx:0,wy:0,   // angular velocity (wx=topspin axis, wy=sidespin axis)
     wz:0,        // accumulated visual rotation
+    rotX:Math.random()*Math.PI*2,rotY:Math.random()*Math.PI*2, // visual rotation angles
     sliding:false,onTable:true,
     spr:{sq:0,wob:0,wobAmp:0,wobAng:0}};
 }
@@ -386,12 +387,14 @@ function stepBall(b,dt){
 
   b.x+=b.vx*dt;
   b.y+=b.vy*dt;
-  b.wz+=spd*dt/P.R; // visual rotation accumulator
 
-  // Minimal squash effect
-  b.spr.sq*=.8;
-  b.spr.wobAmp*=.8;
-  b.spr.wob+=.3;
+  // Update visual rotation based on velocity (rolling effect)
+  const rotSpeed=spd*dt/P.R;
+  if(spd>P.MIN_V){
+    const moveAng=Math.atan2(b.vy,b.vx);
+    b.rotX+=Math.sin(moveAng)*rotSpeed;
+    b.rotY+=Math.cos(moveAng)*rotSpeed;
+  }
 }
 
 function resolveCushion(b,silent){
@@ -710,7 +713,7 @@ function drawTable(){
   });
 }
 
-function drawBallAt(px,py,color,stripe,r,num,lx,ly){
+function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   // Calculate light direction and intensity
   const dx=lx-px,dy=ly-py;
   const dist=Math.hypot(dx,dy);
@@ -725,9 +728,27 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly){
   ctx.beginPath();ctx.arc(shx,shy,r*1.25,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
 
   ctx.save();ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.clip();
+
+  // Calculate 3D rotation for number/stripe position
+  const cosX=Math.cos(rotX),sinX=Math.sin(rotX);
+  const cosY=Math.cos(rotY),sinY=Math.sin(rotY);
+  // Project point on sphere surface (number faces "up" initially)
+  const surfaceZ=cosX*cosY;
+  const surfaceX=sinY*r*0.65;
+  const surfaceY=-sinX*cosY*r*0.65;
+  const visible=surfaceZ>0;
+  const scale=0.5+surfaceZ*0.5;
+
   if(stripe){
     ctx.fillStyle='#f0ece0';ctx.fillRect(px-r,py-r,r*2,r*2);
-    ctx.fillStyle=color;ctx.fillRect(px-r,py-r*.44,r*2,r*.88);
+    // Rotating stripe band
+    ctx.save();
+    ctx.translate(px,py);
+    ctx.rotate(rotY);
+    const stripeOffset=sinX*r*0.6;
+    ctx.fillStyle=color;
+    ctx.fillRect(-r,stripeOffset-r*.44,r*2,r*.88);
+    ctx.restore();
   } else {
     const g=ctx.createRadialGradient(hlx,hly,r*.04,px,py,r);
     g.addColorStop(0,lc(color,Math.round(55*lightInt)));
@@ -739,17 +760,22 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly){
   const hlAlpha=(0.35+0.25*lightInt).toFixed(2);
   ctx.beginPath();ctx.arc(hlx,hly,r*.22,0,Math.PI*2);
   ctx.fillStyle=`rgba(255,255,220,${hlAlpha})`;ctx.fill();
-  // Secondary softer highlight
   ctx.beginPath();ctx.arc(hlx-nx*r*.1,hly-ny*r*.1,r*.12,0,Math.PI*2);
   ctx.fillStyle=`rgba(255,255,255,${(lightInt*0.5).toFixed(2)})`;ctx.fill();
   ctx.restore();
-  if(num>0){
-    const fs=Math.max(6,Math.round(r*.64));
-    ctx.beginPath();ctx.arc(px,py,r*.34,0,Math.PI*2);
-    ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();
+
+  // Draw number with 3D rolling effect
+  if(num>0&&visible){
+    const numX=px+surfaceX,numY=py+surfaceY;
+    const fs=Math.max(6,Math.round(r*.64*scale));
+    const circleR=r*.34*scale;
+    const alpha=Math.min(1,surfaceZ*1.5).toFixed(2);
+    ctx.beginPath();ctx.arc(numX,numY,circleR,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${alpha*.85})`;ctx.fill();
     ctx.font=`500 ${fs}px "DM Mono",monospace`;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle='#111';ctx.fillText(num,px,py+1);
+    ctx.fillStyle=`rgba(17,17,17,${alpha})`;
+    ctx.fillText(num,numX,numY+1*scale);
   }
   ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
   ctx.strokeStyle='rgba(0,0,0,.32)';ctx.lineWidth=.6;ctx.stroke();
@@ -763,7 +789,7 @@ function drawAllBalls(){
     if(!b.onTable)continue;
     const p=tc(b.x,b.y);
     const col=b.type==='cue'?'#f5f0e8':b.type==='eight'?'#111':BALL_COLORS[b.cIdx];
-    drawBallAt(p.x,p.y,col,b.stripe,r,b.num,lampX,lampY);
+    drawBallAt(p.x,p.y,col,b.stripe,r,b.num,lampX,lampY,b.rotX||0,b.rotY||0);
   }
 }
 
