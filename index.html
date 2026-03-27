@@ -765,12 +765,28 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
     g.addColorStop(1,dc(color,Math.round(38+20*(1-lightInt))));
     ctx.fillStyle=g;ctx.fillRect(px-r,py-r,r*2,r*2);
   }
-  // Dynamic highlight based on light position
-  const hlAlpha=(0.35+0.25*lightInt).toFixed(2);
-  ctx.beginPath();ctx.arc(hlx,hly,r*.22,0,Math.PI*2);
-  ctx.fillStyle=`rgba(255,255,220,${hlAlpha})`;ctx.fill();
-  ctx.beginPath();ctx.arc(hlx-nx*r*.1,hly-ny*r*.1,r*.12,0,Math.PI*2);
-  ctx.fillStyle=`rgba(255,255,255,${(lightInt*0.5).toFixed(2)})`;ctx.fill();
+  // Dynamic highlight with soft blur effect - subtle yellow tones
+  const hlAlpha=0.25+0.2*lightInt;
+  // Outer soft glow
+  const glow1=ctx.createRadialGradient(hlx,hly,0,hlx,hly,r*.4);
+  glow1.addColorStop(0,`rgba(255,240,180,${(hlAlpha*.7).toFixed(2)})`);
+  glow1.addColorStop(0.4,`rgba(255,230,150,${(hlAlpha*.4).toFixed(2)})`);
+  glow1.addColorStop(1,'rgba(255,220,120,0)');
+  ctx.beginPath();ctx.arc(hlx,hly,r*.4,0,Math.PI*2);
+  ctx.fillStyle=glow1;ctx.fill();
+  // Inner highlight
+  const glow2=ctx.createRadialGradient(hlx,hly,0,hlx,hly,r*.18);
+  glow2.addColorStop(0,`rgba(255,250,220,${(hlAlpha*1.1).toFixed(2)})`);
+  glow2.addColorStop(0.5,`rgba(255,240,180,${(hlAlpha*.6).toFixed(2)})`);
+  glow2.addColorStop(1,'rgba(255,230,150,0)');
+  ctx.beginPath();ctx.arc(hlx,hly,r*.18,0,Math.PI*2);
+  ctx.fillStyle=glow2;ctx.fill();
+  // Tiny specular
+  const spec=ctx.createRadialGradient(hlx-nx*r*.05,hly-ny*r*.05,0,hlx-nx*r*.05,hly-ny*r*.05,r*.08);
+  spec.addColorStop(0,`rgba(255,255,240,${(lightInt*0.5).toFixed(2)})`);
+  spec.addColorStop(1,'rgba(255,250,220,0)');
+  ctx.beginPath();ctx.arc(hlx-nx*r*.05,hly-ny*r*.05,r*.08,0,Math.PI*2);
+  ctx.fillStyle=spec;ctx.fill();
   ctx.restore();
 
   // Draw number with 3D rolling effect - synced with stripe
