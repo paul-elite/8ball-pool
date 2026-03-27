@@ -1231,16 +1231,16 @@ function drawCue(){
     cueCtx.restore();
   }
 
-  // Draw rotating aim cursor near cue tip, offset to the right
+  // Draw rotating aim cursor near cue tip, offset to the left
   if(aimCursorImg.complete && !isAI[curP]){
     const cursorSize = 28 * s;
     const tipOffset = 12 * s; // Small gap from tip along cue direction
-    const rightOffset = 24 * s; // Offset to the right of cue
-    // Perpendicular vector (to the right): (-dy, dx)
-    const perpX = -dy, perpY = dx;
-    // Position cursor beside cue tip, offset to the right
-    const cursorX = tx + dx * tipOffset + perpX * rightOffset;
-    const cursorY = ty + dy * tipOffset + perpY * rightOffset;
+    const sideOffset = 24 * s; // Offset to the left of cue
+    // Perpendicular vector (to the left): (dy, -dx)
+    const perpX = dy, perpY = -dx;
+    // Position cursor beside cue tip, offset to the left
+    const cursorX = tx + dx * tipOffset + perpX * sideOffset;
+    const cursorY = ty + dy * tipOffset + perpY * sideOffset;
 
     cueCtx.save();
     cueCtx.translate(cursorX, cursorY);
