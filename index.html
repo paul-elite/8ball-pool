@@ -127,39 +127,41 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
 #left-panel{position:absolute;left:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:14px 12px;border-radius:14px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);}
 #left-panel .label{font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:2px;text-transform:uppercase;font-weight:600;}
 
-/* Skill Orb Buttons */
-.skill-orb{width:44px;height:44px;border-radius:50%;cursor:pointer;position:relative;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);border:none;background:transparent;padding:0;}
-.skill-orb:hover:not(.used){transform:scale(1.12) translateY(-2px);}
-.skill-orb:active:not(.used){transform:scale(0.95);}
+/* Skill Gem Buttons */
+.skill-gem{width:48px;height:56px;cursor:pointer;position:relative;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);border:none;background:transparent;padding:0;}
+.skill-gem:hover:not(.locked):not(.used){transform:scale(1.1) translateY(-3px);filter:brightness(1.15);}
+.skill-gem:active:not(.locked):not(.used){transform:scale(0.95);}
+.skill-gem svg{width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5));}
 
-/* 3D Shiny Orb - Active State */
-.skill-orb .orb{width:100%;height:100%;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;}
-.skill-orb:not(.used) .orb{background:radial-gradient(circle at 30% 25%,rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.4) 15%,var(--orb-color) 45%,var(--orb-dark) 100%);box-shadow:0 4px 15px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.3);}
-.skill-orb:not(.used):hover .orb{box-shadow:0 6px 25px var(--orb-glow),0 0 20px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.4);}
+/* Locked State - Dark Silhouette */
+.skill-gem.locked{cursor:not-allowed;opacity:0.5;}
+.skill-gem.locked svg .gem-fill{fill:#1a1a1a !important;}
+.skill-gem.locked svg .gem-highlight{fill:#2a2a2a !important;opacity:0.3 !important;}
+.skill-gem.locked svg .frame-fill{fill:#3a3020 !important;}
+.skill-gem.locked svg .frame-highlight{fill:#4a4030 !important;}
+.skill-gem.locked svg .frame-shadow{fill:#1a1008 !important;}
 
-/* Orb Icon */
-.skill-orb .orb svg{width:22px;height:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));transition:all 0.3s ease;}
-.skill-orb:not(.used) .orb svg{fill:#fff;}
+/* Used State */
+.skill-gem.used{cursor:not-allowed;opacity:0.4;filter:grayscale(0.8);}
 
-/* Used/Inactive State - Silhouette */
-.skill-orb.used .orb{background:linear-gradient(145deg,rgba(40,40,40,0.6),rgba(20,20,20,0.8));box-shadow:inset 0 2px 8px rgba(0,0,0,0.5),0 1px 3px rgba(0,0,0,0.3);}
-.skill-orb.used .orb svg{fill:rgba(80,80,80,0.5);}
-.skill-orb.used{cursor:not-allowed;opacity:0.6;}
+/* Armed/Selected State */
+.skill-gem.armed{animation:gem-pulse 1s ease-in-out infinite;}
+@keyframes gem-pulse{0%,100%{filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 8px var(--gem-glow));}50%{filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 20px var(--gem-glow)) drop-shadow(0 0 30px var(--gem-glow));}}
 
-/* Selected/Armed State */
-.skill-orb.armed .orb{animation:orb-pulse 1s ease-in-out infinite;}
-@keyframes orb-pulse{0%,100%{box-shadow:0 4px 15px var(--orb-glow),0 0 10px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.3);}50%{box-shadow:0 6px 30px var(--orb-glow),0 0 30px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.4);}}
-
-/* Skill Colors */
-.skill-orb.freeze{--orb-color:#4fc3f7;--orb-dark:#0277bd;--orb-glow:rgba(79,195,247,0.5);}
-.skill-orb.laser{--orb-color:#ffb74d;--orb-dark:#e65100;--orb-glow:rgba(255,183,77,0.5);}
-.skill-orb.rewind{--orb-color:#ba68c8;--orb-dark:#6a1b9a;--orb-glow:rgba(186,104,200,0.5);}
-.skill-orb.timewarp{--orb-color:#4db6ac;--orb-dark:#00695c;--orb-glow:rgba(77,182,172,0.5);}
-.skill-orb.ghost{--orb-color:#90a4ae;--orb-dark:#37474f;--orb-glow:rgba(144,164,174,0.5);}
+/* Gem Glow Colors */
+.skill-gem.freeze{--gem-glow:rgba(100,200,255,0.8);}
+.skill-gem.laser{--gem-glow:rgba(255,180,60,0.8);}
+.skill-gem.rewind{--gem-glow:rgba(200,100,220,0.8);}
+.skill-gem.timewarp{--gem-glow:rgba(80,200,180,0.8);}
+.skill-gem.ghost{--gem-glow:rgba(180,180,200,0.8);}
 
 /* Skill tooltip */
-.skill-orb::after{content:attr(data-name);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.85);color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.2s ease;font-family:'Geist',sans-serif;font-weight:600;letter-spacing:0.5px;}
-.skill-orb:hover::after{opacity:1;}
+.skill-gem::after{content:attr(data-name);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.9);color:#fff;font-size:10px;padding:4px 8px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.2s ease;font-family:'Geist',sans-serif;font-weight:600;letter-spacing:0.5px;border:1px solid rgba(255,200,100,0.3);}
+.skill-gem:hover::after{opacity:1;}
+
+/* Unlock animation */
+@keyframes gem-unlock{0%{transform:scale(0.5);opacity:0;filter:brightness(2);}50%{transform:scale(1.3);filter:brightness(1.5);}100%{transform:scale(1);opacity:1;filter:brightness(1);}}
+.skill-gem.just-unlocked{animation:gem-unlock 0.6s ease-out;}
 
 /* Right Panel - Power Meter */
 #right-panel{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:14px 12px;border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);}
@@ -219,15 +221,9 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
 .skill-help-text strong{display:block;color:var(--gold);font-size:14px;margin-bottom:2px;}
 .skill-help-text span{font-size:12px;color:var(--text-secondary);}
 
-/* Mini Skill Orbs for Help Panel */
-.skill-orb-mini{width:36px;height:36px;border-radius:50%;flex-shrink:0;}
-.skill-orb-mini .orb{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.3) 15%,var(--orb-color) 45%,var(--orb-dark) 100%);box-shadow:0 3px 10px var(--orb-glow),inset 0 -3px 8px var(--orb-dark),inset 0 3px 8px rgba(255,255,255,0.25);}
-.skill-orb-mini .orb svg{width:18px;height:18px;fill:#fff;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.3));}
-.skill-orb-mini.freeze{--orb-color:#4fc3f7;--orb-dark:#0277bd;--orb-glow:rgba(79,195,247,0.4);}
-.skill-orb-mini.laser{--orb-color:#ffb74d;--orb-dark:#e65100;--orb-glow:rgba(255,183,77,0.4);}
-.skill-orb-mini.rewind{--orb-color:#ba68c8;--orb-dark:#6a1b9a;--orb-glow:rgba(186,104,200,0.4);}
-.skill-orb-mini.timewarp{--orb-color:#4db6ac;--orb-dark:#00695c;--orb-glow:rgba(77,182,172,0.4);}
-.skill-orb-mini.ghost{--orb-color:#90a4ae;--orb-dark:#37474f;--orb-glow:rgba(144,164,174,0.4);}
+/* Mini Skill Gems for Help Panel */
+.skill-gem-mini{width:32px;height:38px;flex-shrink:0;}
+.skill-gem-mini svg{width:100%;height:100%;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));}
 
 /* Overlay */
 #ov{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(15,40,20,0.97) 0%,rgba(8,20,12,0.99) 100%);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:24px;}
@@ -382,6 +378,18 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
 </style>
 </head>
 <body>
+<!-- Shared SVG gradient definitions for skill gems -->
+<svg style="position:absolute;width:0;height:0;" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldFrame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5e6a3"/>
+      <stop offset="25%" stop-color="#d4a84b"/>
+      <stop offset="50%" stop-color="#c9a227"/>
+      <stop offset="75%" stop-color="#8b6914"/>
+      <stop offset="100%" stop-color="#5d4e37"/>
+    </linearGradient>
+  </defs>
+</svg>
 <div id="app">
 <div id="rotate-overlay">
   <div class="rotate-icon">📱</div>
@@ -425,20 +433,65 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
   <div id="game-area">
     <div id="left-panel">
       <div class="label">SKILLS</div>
-      <button class="skill-orb freeze" data-skill="freeze" data-name="Freeze">
-        <div class="orb"><svg viewBox="0 0 24 24"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z"/></svg></div>
+      <!-- Freeze: Ice Blue Teardrop Gem -->
+      <button class="skill-gem freeze locked" data-skill="freeze" data-name="Freeze">
+        <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="freezeGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b3e5fc"/><stop offset="30%" stop-color="#4fc3f7"/><stop offset="70%" stop-color="#0288d1"/><stop offset="100%" stop-color="#01579b"/></linearGradient></defs>
+          <path class="frame-shadow" d="M24 54c-12 0-20-18-20-30C4 12 12 4 24 4s20 8 20 20c0 12-8 30-20 30z" fill="#5d4e37"/>
+          <path class="frame-fill" d="M24 52c-11 0-18-16-18-28C6 13 13 6 24 6s18 7 18 18c0 12-7 28-18 28z" fill="url(#goldFrame)"/>
+          <path class="frame-highlight" d="M24 6c11 0 18 7 18 18 0 2-0.5 5-1 8-2-10-8-20-17-20S9 22 7 32c-0.5-3-1-6-1-8C6 13 13 6 24 6z" fill="#f5e6a3" opacity="0.4"/>
+          <path class="gem-fill" d="M24 48c-9 0-14-14-14-24C10 15 16 10 24 10s14 5 14 14c0 10-5 24-14 24z" fill="url(#freezeGem)"/>
+          <path class="gem-highlight" d="M18 18c4-4 12-4 16 0-3-6-8-6-12-4s-6 2-4 4z" fill="#fff" opacity="0.7"/>
+          <ellipse class="gem-highlight" cx="18" cy="20" rx="4" ry="3" fill="#fff" opacity="0.5"/>
+        </svg>
       </button>
-      <button class="skill-orb laser" data-skill="laser" data-name="Laser Aim">
-        <div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm0-2h2V7h-2z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <!-- Laser: Orange Hexagon Gem -->
+      <button class="skill-gem laser locked" data-skill="laser" data-name="Laser Aim">
+        <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="laserGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffe0b2"/><stop offset="30%" stop-color="#ffb74d"/><stop offset="70%" stop-color="#f57c00"/><stop offset="100%" stop-color="#e65100"/></linearGradient></defs>
+          <polygon class="frame-shadow" points="24,2 44,14 44,42 24,54 4,42 4,14" fill="#5d4e37"/>
+          <polygon class="frame-fill" points="24,5 41,16 41,40 24,51 7,40 7,16" fill="#c9a227"/>
+          <polygon class="frame-highlight" points="24,5 41,16 41,22 24,11 7,22 7,16" fill="#f5e6a3" opacity="0.5"/>
+          <polygon class="gem-fill" points="24,10 36,18 36,38 24,46 12,38 12,18" fill="url(#laserGem)"/>
+          <polygon class="gem-highlight" points="24,12 34,19 34,24 24,17 14,24 14,19" fill="#fff" opacity="0.6"/>
+          <ellipse class="gem-highlight" cx="18" cy="22" rx="4" ry="3" fill="#fff" opacity="0.4"/>
+        </svg>
       </button>
-      <button class="skill-orb rewind" data-skill="rewind" data-name="Rewind">
-        <div class="orb"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></div>
+      <!-- Rewind: Purple Diamond Gem -->
+      <button class="skill-gem rewind locked" data-skill="rewind" data-name="Rewind">
+        <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="rewindGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e1bee7"/><stop offset="30%" stop-color="#ba68c8"/><stop offset="70%" stop-color="#8e24aa"/><stop offset="100%" stop-color="#4a148c"/></linearGradient></defs>
+          <polygon class="frame-shadow" points="24,2 46,28 24,54 2,28" fill="#5d4e37"/>
+          <polygon class="frame-fill" points="24,5 43,28 24,51 5,28" fill="#c9a227"/>
+          <polygon class="frame-highlight" points="24,5 43,28 36,28 24,10 12,28 5,28" fill="#f5e6a3" opacity="0.5"/>
+          <polygon class="gem-fill" points="24,10 38,28 24,46 10,28" fill="url(#rewindGem)"/>
+          <polygon class="gem-highlight" points="24,12 35,27 24,18 13,27" fill="#fff" opacity="0.6"/>
+          <ellipse class="gem-highlight" cx="18" cy="24" rx="4" ry="3" fill="#fff" opacity="0.4"/>
+        </svg>
       </button>
-      <button class="skill-orb timewarp" data-skill="timewarp" data-name="Time Warp">
-        <div class="orb"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+      <!-- Time Warp: Teal Oval Gem -->
+      <button class="skill-gem timewarp locked" data-skill="timewarp" data-name="Time Warp">
+        <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="timewarpGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b2dfdb"/><stop offset="30%" stop-color="#4db6ac"/><stop offset="70%" stop-color="#00897b"/><stop offset="100%" stop-color="#004d40"/></linearGradient></defs>
+          <ellipse class="frame-shadow" cx="24" cy="28" rx="22" ry="26" fill="#5d4e37"/>
+          <ellipse class="frame-fill" cx="24" cy="28" rx="20" ry="24" fill="#c9a227"/>
+          <ellipse class="frame-highlight" cx="24" cy="16" rx="16" ry="10" fill="#f5e6a3" opacity="0.4"/>
+          <ellipse class="gem-fill" cx="24" cy="28" rx="15" ry="19" fill="url(#timewarpGem)"/>
+          <ellipse class="gem-highlight" cx="19" cy="20" rx="6" ry="5" fill="#fff" opacity="0.6"/>
+          <ellipse class="gem-highlight" cx="16" cy="22" rx="3" ry="2" fill="#fff" opacity="0.4"/>
+        </svg>
       </button>
-      <button class="skill-orb ghost" data-skill="ghost" data-name="Ghost Ball">
-        <div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 5.58 4 10c0 2.03.76 3.87 2 5.28V21h3v-2h2v2h2v-2h2v2h3v-5.72c1.24-1.41 2-3.25 2-5.28 0-4.42-3.58-8-8-8zm-2 10c-.83 0-1.5-.67-1.5-1.5S9.17 9 10 9s1.5.67 1.5 1.5S10.83 12 10 12zm4 0c-.83 0-1.5-.67-1.5-1.5S13.17 9 14 9s1.5.67 1.5 1.5S14.83 12 14 12z"/></svg></div>
+      <!-- Ghost: Silver Shield Gem -->
+      <button class="skill-gem ghost locked" data-skill="ghost" data-name="Ghost Ball">
+        <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="ghostGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#eceff1"/><stop offset="30%" stop-color="#90a4ae"/><stop offset="70%" stop-color="#546e7a"/><stop offset="100%" stop-color="#263238"/></linearGradient></defs>
+          <path class="frame-shadow" d="M24 2L44 12V34C44 42 36 52 24 54C12 52 4 42 4 34V12L24 2z" fill="#5d4e37"/>
+          <path class="frame-fill" d="M24 5L41 14V33C41 40 34 49 24 51C14 49 7 40 7 33V14L24 5z" fill="#c9a227"/>
+          <path class="frame-highlight" d="M24 5L41 14V20C34 16 28 10 24 8C20 10 14 16 7 20V14L24 5z" fill="#f5e6a3" opacity="0.5"/>
+          <path class="gem-fill" d="M24 10L36 17V32C36 38 31 45 24 47C17 45 12 38 12 32V17L24 10z" fill="url(#ghostGem)"/>
+          <path class="gem-highlight" d="M24 12L34 18V22C28 19 24 15 24 15C24 15 20 19 14 22V18L24 12z" fill="#fff" opacity="0.6"/>
+          <ellipse class="gem-highlight" cx="18" cy="22" rx="4" ry="3" fill="#fff" opacity="0.4"/>
+        </svg>
       </button>
     </div>
 
@@ -482,27 +535,31 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
       <div style="margin-top:14px;font-size:13px;color:var(--dim);text-align:center;">Pot all your balls (solids or stripes), then sink the 8-ball to win!</div>
     </div>
     <div id="help-skills" class="help-panel">
-      <div class="skill-help-row">
-        <div class="skill-orb-mini freeze"><div class="orb"><svg viewBox="0 0 24 24"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z"/></svg></div></div>
-        <div class="skill-help-text"><strong>Freeze</strong><span>Cue ball stops instantly after hitting target ball</span></div>
+      <div style="background:rgba(228,184,77,0.15);padding:10px 14px;border-radius:8px;margin-bottom:12px;border:1px solid rgba(228,184,77,0.3);">
+        <div style="font-size:13px;color:var(--gold);font-weight:700;margin-bottom:4px;">How to Earn Skills</div>
+        <div style="font-size:11px;color:var(--text-secondary);">Pot 2 of your balls legally to unlock one skill gem. Skills unlock in order from top to bottom.</div>
       </div>
       <div class="skill-help-row">
-        <div class="skill-orb-mini laser"><div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm0-2h2V7h-2z"/><circle cx="12" cy="12" r="3"/></svg></div></div>
-        <div class="skill-help-text"><strong>Laser Aim</strong><span>Extended guideline shows 3 bounces ahead</span></div>
+        <div class="skill-gem-mini" style="background:linear-gradient(135deg,#4fc3f7,#01579b);"></div>
+        <div class="skill-help-text"><strong style="color:#4fc3f7;">Freeze</strong><span>Cue ball stops instantly after hitting target</span></div>
       </div>
       <div class="skill-help-row">
-        <div class="skill-orb-mini rewind"><div class="orb"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></div></div>
-        <div class="skill-help-text"><strong>Rewind</strong><span>Undo your last shot and try again</span></div>
+        <div class="skill-gem-mini" style="background:linear-gradient(135deg,#ffb74d,#e65100);"></div>
+        <div class="skill-help-text"><strong style="color:#ffb74d;">Laser Aim</strong><span>Extended guideline shows 5 bounces ahead</span></div>
       </div>
       <div class="skill-help-row">
-        <div class="skill-orb-mini timewarp"><div class="orb"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div></div>
-        <div class="skill-help-text"><strong>Time Warp</strong><span>Slow motion during ball movement</span></div>
+        <div class="skill-gem-mini" style="background:linear-gradient(135deg,#ba68c8,#4a148c);"></div>
+        <div class="skill-help-text"><strong style="color:#ba68c8;">Rewind</strong><span>Undo your last shot (press Z or Replay)</span></div>
       </div>
       <div class="skill-help-row">
-        <div class="skill-orb-mini ghost"><div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 5.58 4 10c0 2.03.76 3.87 2 5.28V21h3v-2h2v2h2v-2h2v2h3v-5.72c1.24-1.41 2-3.25 2-5.28 0-4.42-3.58-8-8-8zm-2 10c-.83 0-1.5-.67-1.5-1.5S9.17 9 10 9s1.5.67 1.5 1.5S10.83 12 10 12zm4 0c-.83 0-1.5-.67-1.5-1.5S13.17 9 14 9s1.5.67 1.5 1.5S14.83 12 14 12z"/></svg></div></div>
-        <div class="skill-help-text"><strong>Ghost Ball</strong><span>Cue ball phases through first ball it touches</span></div>
+        <div class="skill-gem-mini" style="background:linear-gradient(135deg,#4db6ac,#004d40);"></div>
+        <div class="skill-help-text"><strong style="color:#4db6ac;">Time Warp</strong><span>Slow motion during ball movement</span></div>
       </div>
-      <div style="margin-top:14px;font-size:12px;color:var(--dim);text-align:center;">Click a skill orb to arm it, then take your shot. Skills reset each game.</div>
+      <div class="skill-help-row">
+        <div class="skill-gem-mini" style="background:linear-gradient(135deg,#90a4ae,#263238);"></div>
+        <div class="skill-help-text"><strong style="color:#90a4ae;">Ghost Ball</strong><span>Cue ball phases through first ball touched</span></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--dim);text-align:center;">Click an unlocked gem to arm it, then take your shot. Each skill can only be used once per game.</div>
     </div>
     <button id="controls-close">Got it!</button>
   </div>
@@ -668,14 +725,17 @@ let peer = null, conn = null;
 let isOnline = false, isHost = false, myPlayerIdx = 0;
 let roomCode = '';
 
-// Skills System
+// Skills System - Skills are EARNED during play by potting balls
+const SKILL_ORDER = ['freeze', 'laser', 'rewind', 'timewarp', 'ghost'];
 const SKILLS = {
-  freeze: { name: 'Freeze', used: [false, false], armed: null },
-  laser: { name: 'Laser Aim', used: [false, false], armed: null },
-  rewind: { name: 'Rewind', used: [false, false], armed: null },
-  timewarp: { name: 'Time Warp', used: [false, false], armed: null },
-  ghost: { name: 'Ghost Ball', used: [false, false], armed: null }
+  freeze: { name: 'Freeze', unlocked: [false, false], used: [false, false] },
+  laser: { name: 'Laser Aim', unlocked: [false, false], used: [false, false] },
+  rewind: { name: 'Rewind', unlocked: [false, false], used: [false, false] },
+  timewarp: { name: 'Time Warp', unlocked: [false, false], used: [false, false] },
+  ghost: { name: 'Ghost Ball', unlocked: [false, false], used: [false, false] }
 };
+let skillProgress = [0, 0]; // Balls potted toward next skill unlock (per player)
+const BALLS_TO_UNLOCK = 2; // Pot 2 balls to unlock a skill
 let activeSkill = null; // Currently armed skill for next shot
 let rewindState = null; // State snapshot for rewind skill
 let timeWarpActive = false; // Slow-mo active
@@ -1213,6 +1273,12 @@ function afterShot(){
       const mg=myGroup();
       if(mg){if((mg==='solid'?solPot:strPot).length>0)keep=true;}
       else if(anyObj.some(b=>groupOf(b)))keep=true;
+
+      // Earn skill progress for legally potting balls
+      const myPotted = mg ? (mg==='solid'?solPot:strPot).length : anyObj.filter(b=>groupOf(b)).length;
+      if(myPotted > 0) {
+        earnSkillProgress(curP, myPotted);
+      }
     }
 
     if(foul){
@@ -2161,28 +2227,31 @@ document.querySelectorAll('.help-tab').forEach(tab => {
   });
 });
 
-// Skill orb click handlers
-document.querySelectorAll('.skill-orb').forEach(orb => {
-  orb.addEventListener('click', () => {
-    const skill = orb.dataset.skill;
-    if(orb.classList.contains('used')) return; // Can't use spent skills
+// Skill gem click handlers
+document.querySelectorAll('.skill-gem').forEach(gem => {
+  gem.addEventListener('click', () => {
+    const skill = gem.dataset.skill;
+    if(gem.classList.contains('locked')) return; // Can't use locked skills
+    if(gem.classList.contains('used')) return; // Can't use spent skills
     if(phase !== 'aiming' || isAI[curP]) return; // Only during player's aiming phase
 
     // Toggle armed state
-    document.querySelectorAll('.skill-orb').forEach(o => o.classList.remove('armed'));
+    document.querySelectorAll('.skill-gem').forEach(g => g.classList.remove('armed'));
     if(activeSkill === skill) {
       activeSkill = null;
     } else {
       activeSkill = skill;
-      orb.classList.add('armed');
+      gem.classList.add('armed');
     }
   });
 });
 
 function resetSkills() {
   Object.keys(SKILLS).forEach(key => {
+    SKILLS[key].unlocked = [false, false];
     SKILLS[key].used = [false, false];
   });
+  skillProgress = [0, 0];
   activeSkill = null;
   rewindState = null;
   timeWarpActive = false;
@@ -2193,12 +2262,48 @@ function resetSkills() {
 }
 
 function updateSkillUI() {
-  document.querySelectorAll('.skill-orb').forEach(orb => {
-    const skill = orb.dataset.skill;
+  document.querySelectorAll('.skill-gem').forEach(gem => {
+    const skill = gem.dataset.skill;
+    const isUnlocked = SKILLS[skill].unlocked[curP];
     const isUsed = SKILLS[skill].used[curP];
-    orb.classList.toggle('used', isUsed);
-    orb.classList.toggle('armed', activeSkill === skill && !isUsed);
+    gem.classList.toggle('locked', !isUnlocked);
+    gem.classList.toggle('used', isUsed);
+    gem.classList.toggle('armed', activeSkill === skill && isUnlocked && !isUsed);
   });
+}
+
+function earnSkillProgress(player, ballsCount) {
+  // Add progress toward unlocking next skill
+  skillProgress[player] += ballsCount;
+
+  // Check if enough balls potted to unlock a skill
+  while(skillProgress[player] >= BALLS_TO_UNLOCK) {
+    skillProgress[player] -= BALLS_TO_UNLOCK;
+    unlockNextSkill(player);
+  }
+}
+
+function unlockNextSkill(player) {
+  // Find next locked skill for this player
+  for(const skillKey of SKILL_ORDER) {
+    if(!SKILLS[skillKey].unlocked[player]) {
+      SKILLS[skillKey].unlocked[player] = true;
+
+      // Show unlock animation
+      const gem = document.querySelector(`.skill-gem.${skillKey}`);
+      if(gem && player === curP) {
+        gem.classList.remove('locked');
+        gem.classList.add('just-unlocked');
+        setTimeout(() => gem.classList.remove('just-unlocked'), 600);
+      }
+
+      // Show event notification
+      if(player === curP) {
+        showEvent('SKILL UNLOCKED!', SKILLS[skillKey].name);
+      }
+      return;
+    }
+  }
 }
 
 function activateSkillForShot() {
