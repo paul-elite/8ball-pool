@@ -8,24 +8,51 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Geist:wght@600;800&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#1a2e1a;--bg-dark:#0f1f0f;--panel:#1e3a1e;--border:#2d4a2d;--text:#e4e4d0;--dim:#6a7a6a;--gold:#c8a84b;--gold-dark:#8a6a20;--accent:#4a8;--danger:#e04444;}
-html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'Geist',sans-serif;overflow:hidden;user-select:none;}
+:root{
+  /* Refined color palette - deeper, richer tones */
+  --bg:#0d1f12;
+  --bg-dark:#081510;
+  --panel:rgba(22,45,28,0.85);
+  --panel-solid:#162d1c;
+  --border:rgba(58,95,68,0.5);
+  --border-light:rgba(120,180,130,0.2);
+  --text:#f0efe6;
+  --text-secondary:#c8d4ca;
+  --dim:#7a9a7f;
+  --gold:#e4b84d;
+  --gold-light:#f5d87a;
+  --gold-dark:#a67c25;
+  --accent:#3eb489;
+  --accent-light:#5ed4a8;
+  --accent-glow:rgba(62,180,137,0.4);
+  --danger:#f05545;
+  --danger-glow:rgba(240,85,69,0.3);
+  /* Premium shadows */
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.5);
+  --shadow-glow:0 0 20px var(--accent-glow);
+  --shadow-gold:0 0 15px rgba(228,184,77,0.3);
+}
+html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,#0a1a0f 50%,#061208 100%);color:var(--text);font-family:'Geist',sans-serif;overflow:hidden;user-select:none;}
 
 /* Main Layout */
 #app{display:flex;flex-direction:column;height:100vh;padding:12px;}
 
 /* Header */
-#header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;flex-shrink:0;}
-.player-info{display:flex;align-items:center;gap:12px;}
+#header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;flex-shrink:0;background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-bottom:8px;}
+.player-info{display:flex;align-items:center;gap:14px;transition:transform 0.3s ease,opacity 0.3s ease;}
+.player-info:hover{transform:translateY(-1px);}
 .player-info.right{flex-direction:row-reverse;}
 .player-info.right .player-name{text-align:right;}
-.avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#6a5,#485);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;}
-.player-name{font-size:20px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:color 0.2s;}
-.player-name:hover{color:var(--gold);}
-.player-bar{width:120px;height:12px;background:#1e3a1e;border-radius:6px;overflow:hidden;margin-top:6px;}
-.player-bar-fill{height:100%;border-radius:6px;width:0%;transition:width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
-.player-bar-fill.p1{background:linear-gradient(90deg,#e44,#fa0,#fc0);}
-.player-bar-fill.p2{background:linear-gradient(90deg,#888,#aaa);}
+.avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#4a9868,#2d6b45);border:3px solid var(--gold);box-shadow:var(--shadow-gold),inset 0 2px 4px rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,0.3);transition:all 0.3s ease;}
+.avatar:hover{border-color:var(--gold-light);transform:scale(1.05);}
+.player-name{font-size:20px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:all 0.25s ease;text-shadow:0 2px 4px rgba(0,0,0,0.2);}
+.player-name:hover{color:var(--gold-light);text-shadow:var(--shadow-gold);}
+.player-bar{width:120px;height:10px;background:rgba(0,0,0,0.3);border-radius:5px;overflow:hidden;margin-top:6px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);}
+.player-bar-fill{height:100%;border-radius:5px;width:0%;transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 8px currentColor;}
+.player-bar-fill.p1{background:linear-gradient(90deg,#ff5252,#ff9800,#ffc107);box-shadow:0 0 12px rgba(255,152,0,0.5);}
+.player-bar-fill.p2{background:linear-gradient(90deg,#78909c,#b0bec5,#cfd8dc);box-shadow:0 0 12px rgba(176,190,197,0.4);}
 
 #streak-overlay {
   position: absolute;
@@ -77,42 +104,75 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   75%  { transform:translate(-50%,-50%) scale(1) rotate(0deg); opacity:1; }
   100% { transform:translate(-50%,-50%) scale(0.9) rotate(0deg); opacity:0; }
 }
-#timer{background:var(--bg-dark);padding:6px 20px;border-radius:8px;font-size:18px;font-weight:600;border:1px solid var(--border);}
-.icon-btn{width:44px;height:44px;border-radius:8px;background:transparent;border:2px solid var(--border);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;}
-.icon-btn:hover{border-color:var(--accent);color:var(--accent);}
+#timer{background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:8px 24px;border-radius:10px;font-size:18px;font-weight:700;border:1px solid var(--border-light);box-shadow:var(--shadow-sm);font-family:'DM Mono',monospace;letter-spacing:2px;color:var(--gold-light);}
+.icon-btn{width:44px;height:44px;border-radius:10px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--border-light);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:all 0.25s ease;box-shadow:var(--shadow-sm);}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent-light);box-shadow:var(--shadow-glow);transform:translateY(-2px);}
+.icon-btn:active{transform:translateY(0);box-shadow:var(--shadow-sm);}
 
 /* Ball Tray Row */
-#ball-tray-row{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;margin-top:4px;}
-.ball-tray{display:flex;gap:6px;}
-.ball-slot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;position:relative;overflow:hidden;}
-.ball-slot.filled{border-color:transparent;}
-.ball-slot.solid{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.4),var(--ball-color) 50%,rgba(0,0,0,0.3));box-shadow:inset 0 2px 4px rgba(255,255,255,0.3),inset 0 -2px 4px rgba(0,0,0,0.4);}
-.ball-slot.stripe{background:linear-gradient(180deg,#f0ece0 25%,var(--ball-color) 25%,var(--ball-color) 75%,#f0ece0 75%);box-shadow:inset 0 2px 4px rgba(255,255,255,0.3),inset 0 -2px 4px rgba(0,0,0,0.4);}
-.ball-slot.solid::after,.ball-slot.stripe::after{content:'';position:absolute;top:2px;left:4px;width:8px;height:6px;background:radial-gradient(ellipse,rgba(255,255,255,0.5),transparent);border-radius:50%;pointer-events:none;}
-#status-text{font-size:14px;color:var(--text);font-weight:600;text-align:center;flex:1;}
+#ball-tray-row{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;margin-top:4px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:10px;border:1px solid var(--border-light);box-shadow:var(--shadow-sm);}
+.ball-tray{display:flex;gap:8px;}
+.ball-slot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;position:relative;overflow:hidden;transition:all 0.3s ease;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);}
+.ball-slot.filled{border-color:transparent;transform:scale(1);animation:ballPop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes ballPop{0%{transform:scale(0);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.ball-slot.solid{background:radial-gradient(circle at 30% 25%,rgba(255,255,255,0.5),var(--ball-color) 45%,rgba(0,0,0,0.4) 100%);box-shadow:0 3px 8px rgba(0,0,0,0.4),inset 0 2px 4px rgba(255,255,255,0.3),inset 0 -3px 6px rgba(0,0,0,0.4);}
+.ball-slot.stripe{background:linear-gradient(180deg,#f8f4e8 22%,var(--ball-color) 22%,var(--ball-color) 78%,#f8f4e8 78%);box-shadow:0 3px 8px rgba(0,0,0,0.4),inset 0 2px 4px rgba(255,255,255,0.3),inset 0 -3px 6px rgba(0,0,0,0.4);}
+.ball-slot.solid::after,.ball-slot.stripe::after{content:'';position:absolute;top:3px;left:5px;width:8px;height:5px;background:radial-gradient(ellipse,rgba(255,255,255,0.7),transparent);border-radius:50%;pointer-events:none;}
+#status-text{font-size:14px;color:var(--text-secondary);font-weight:600;text-align:center;flex:1;text-shadow:0 1px 2px rgba(0,0,0,0.3);}
 
 /* Game Area */
 #game-area{flex:1;display:flex;align-items:center;justify-content:center;position:relative;padding:10px;}
 
-/* Left Panel */
-#left-panel{position:absolute;left:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;}
-#left-panel .label{font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;}
-.hold-btn{width:36px;height:28px;background:var(--bg-dark);border:1px solid var(--border);border-radius:4px;color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
-.hold-btn:hover{border-color:var(--accent);color:var(--accent);}
-.hold-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+/* Left Panel - Skills */
+#left-panel{position:absolute;left:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:14px 12px;border-radius:14px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);}
+#left-panel .label{font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:2px;text-transform:uppercase;font-weight:600;}
+
+/* Skill Orb Buttons */
+.skill-orb{width:44px;height:44px;border-radius:50%;cursor:pointer;position:relative;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);border:none;background:transparent;padding:0;}
+.skill-orb:hover:not(.used){transform:scale(1.12) translateY(-2px);}
+.skill-orb:active:not(.used){transform:scale(0.95);}
+
+/* 3D Shiny Orb - Active State */
+.skill-orb .orb{width:100%;height:100%;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;}
+.skill-orb:not(.used) .orb{background:radial-gradient(circle at 30% 25%,rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.4) 15%,var(--orb-color) 45%,var(--orb-dark) 100%);box-shadow:0 4px 15px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.3);}
+.skill-orb:not(.used):hover .orb{box-shadow:0 6px 25px var(--orb-glow),0 0 20px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.4);}
+
+/* Orb Icon */
+.skill-orb .orb svg{width:22px;height:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));transition:all 0.3s ease;}
+.skill-orb:not(.used) .orb svg{fill:#fff;}
+
+/* Used/Inactive State - Silhouette */
+.skill-orb.used .orb{background:linear-gradient(145deg,rgba(40,40,40,0.6),rgba(20,20,20,0.8));box-shadow:inset 0 2px 8px rgba(0,0,0,0.5),0 1px 3px rgba(0,0,0,0.3);}
+.skill-orb.used .orb svg{fill:rgba(80,80,80,0.5);}
+.skill-orb.used{cursor:not-allowed;opacity:0.6;}
+
+/* Selected/Armed State */
+.skill-orb.armed .orb{animation:orb-pulse 1s ease-in-out infinite;}
+@keyframes orb-pulse{0%,100%{box-shadow:0 4px 15px var(--orb-glow),0 0 10px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.3);}50%{box-shadow:0 6px 30px var(--orb-glow),0 0 30px var(--orb-glow),0 2px 6px rgba(0,0,0,0.4),inset 0 -4px 10px var(--orb-dark),inset 0 4px 10px rgba(255,255,255,0.4);}}
+
+/* Skill Colors */
+.skill-orb.freeze{--orb-color:#4fc3f7;--orb-dark:#0277bd;--orb-glow:rgba(79,195,247,0.5);}
+.skill-orb.laser{--orb-color:#ffb74d;--orb-dark:#e65100;--orb-glow:rgba(255,183,77,0.5);}
+.skill-orb.rewind{--orb-color:#ba68c8;--orb-dark:#6a1b9a;--orb-glow:rgba(186,104,200,0.5);}
+.skill-orb.timewarp{--orb-color:#4db6ac;--orb-dark:#00695c;--orb-glow:rgba(77,182,172,0.5);}
+.skill-orb.ghost{--orb-color:#90a4ae;--orb-dark:#37474f;--orb-glow:rgba(144,164,174,0.5);}
+
+/* Skill tooltip */
+.skill-orb::after{content:attr(data-name);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.85);color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.2s ease;font-family:'Geist',sans-serif;font-weight:600;letter-spacing:0.5px;}
+.skill-orb:hover::after{opacity:1;}
 
 /* Right Panel - Power Meter */
-#right-panel{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;}
-#power-meter{width:48px;height:320px;background:var(--bg-dark);border:2px solid var(--border);border-radius:6px;display:flex;flex-direction:column-reverse;overflow:hidden;padding:3px;gap:2px;}
-.power-segment{flex:1;border-radius:2px;background:#1e3a1e;transition:background .05s;}
-.power-segment.active.c1{background:#0654FB;}
-.power-segment.active.c2{background:#28A3FB;}
-.power-segment.active.c3{background:#0AE4C0;}
-.power-segment.active.c4{background:#23C217;}
-.power-segment.active.c5{background:#FAC526;}
-.power-segment.active.c6{background:#FC9424;}
-.power-segment.active.c7{background:#EF2626;}
-#power-value{font-size:11px;color:var(--dim);}
+#right-panel{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:14px 12px;border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);}
+#power-meter{width:44px;height:300px;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column-reverse;overflow:hidden;padding:4px;gap:2px;box-shadow:inset 0 2px 8px rgba(0,0,0,0.4);}
+.power-segment{flex:1;border-radius:3px;background:rgba(255,255,255,0.05);transition:all 0.08s ease;}
+.power-segment.active.c1{background:linear-gradient(180deg,#0654FB,#0444d0);box-shadow:0 0 8px rgba(6,84,251,0.6);}
+.power-segment.active.c2{background:linear-gradient(180deg,#28A3FB,#1890e8);box-shadow:0 0 8px rgba(40,163,251,0.6);}
+.power-segment.active.c3{background:linear-gradient(180deg,#0AE4C0,#08c8a8);box-shadow:0 0 8px rgba(10,228,192,0.6);}
+.power-segment.active.c4{background:linear-gradient(180deg,#23C217,#1aa810);box-shadow:0 0 8px rgba(35,194,23,0.6);}
+.power-segment.active.c5{background:linear-gradient(180deg,#FAC526,#e5b020);box-shadow:0 0 8px rgba(250,197,38,0.6);}
+.power-segment.active.c6{background:linear-gradient(180deg,#FC9424,#e88018);box-shadow:0 0 8px rgba(252,148,36,0.6);}
+.power-segment.active.c7{background:linear-gradient(180deg,#EF2626,#d81818);box-shadow:0 0 10px rgba(239,38,38,0.7);}
+#power-value{font-size:11px;color:var(--text-secondary);font-family:'DM Mono',monospace;font-weight:500;}
 
 /* Table Container */
 #table-container{position:relative;}
@@ -129,65 +189,97 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 #potted-stack{display:none;}
 
 /* Bottom Bar */
-#bottom-bar{display:flex;align-items:center;justify-content:center;padding:12px 20px;gap:24px;}
-#bottom-bar .icon-btn{width:40px;height:40px;border-radius:50%;}
-#controls-label{position:absolute;right:20px;font-size:18px;color:var(--dim);display:flex;align-items:center;gap:8px;cursor:pointer;transition:color 0.2s;}
-#controls-label:hover{color:var(--gold);}
-#controls-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:200;align-items:center;justify-content:center;}
+#bottom-bar{display:flex;align-items:center;justify-content:center;padding:12px 20px;gap:20px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-top:8px;}
+#bottom-bar .icon-btn{width:42px;height:42px;border-radius:50%;}
+#controls-label{position:absolute;right:20px;font-size:14px;color:var(--dim);display:flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.25s ease;padding:8px 14px;border-radius:8px;background:rgba(0,0,0,0.2);}
+#controls-label:hover{color:var(--gold-light);background:rgba(228,184,77,0.1);}
+#controls-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
 #controls-modal.active{display:flex;}
-#controls-modal-box{background:var(--panel);border:2px solid var(--border);border-radius:14px;padding:28px 32px;max-width:420px;width:90%;}
-#controls-modal-box h3{font-size:22px;color:var(--gold);margin-bottom:16px;text-align:center;}
+#controls-modal-box{background:var(--panel-solid);border:1px solid var(--border-light);border-radius:16px;padding:28px 32px;max-width:420px;width:90%;box-shadow:var(--shadow-lg);}
+#controls-modal-box h3{font-size:22px;color:var(--gold);margin-bottom:16px;text-align:center;text-shadow:var(--shadow-gold);}
 #controls-modal-box .ctrl-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:14px;}
 #controls-modal-box .ctrl-row:last-child{border-bottom:none;}
 #controls-modal-box .ctrl-key{color:var(--gold);font-weight:700;font-family:'DM Mono',monospace;}
 #controls-modal-box .ctrl-desc{color:var(--text);text-align:right;}
-#controls-close{display:block;margin:18px auto 0;padding:8px 28px;border-radius:8px;border:none;background:var(--gold);color:#000;font-weight:700;font-size:14px;cursor:pointer;}
+#controls-close{display:block;margin:20px auto 0;padding:10px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#000;font-weight:700;font-size:14px;cursor:pointer;transition:all .25s ease;box-shadow:0 4px 12px rgba(228,184,77,0.3);}
+#controls-close:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(228,184,77,0.4);}
+
+/* Help Modal Tabs */
+#help-tabs{display:flex;gap:6px;margin-bottom:16px;background:rgba(0,0,0,0.3);padding:4px;border-radius:10px;}
+.help-tab{flex:1;padding:10px 16px;border:none;background:transparent;color:var(--dim);font-family:'Geist',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border-radius:7px;transition:all .2s ease;}
+.help-tab:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.help-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 3px 10px rgba(62,180,137,0.3);}
+.help-panel{display:none;max-height:320px;overflow-y:auto;}
+.help-panel.active{display:block;animation:fadeIn .2s ease-out;}
+
+/* Skill Help Rows */
+.skill-help-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.skill-help-row:last-of-type{border-bottom:none;}
+.skill-help-text{flex:1;}
+.skill-help-text strong{display:block;color:var(--gold);font-size:14px;margin-bottom:2px;}
+.skill-help-text span{font-size:12px;color:var(--text-secondary);}
+
+/* Mini Skill Orbs for Help Panel */
+.skill-orb-mini{width:36px;height:36px;border-radius:50%;flex-shrink:0;}
+.skill-orb-mini .orb{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.3) 15%,var(--orb-color) 45%,var(--orb-dark) 100%);box-shadow:0 3px 10px var(--orb-glow),inset 0 -3px 8px var(--orb-dark),inset 0 3px 8px rgba(255,255,255,0.25);}
+.skill-orb-mini .orb svg{width:18px;height:18px;fill:#fff;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.3));}
+.skill-orb-mini.freeze{--orb-color:#4fc3f7;--orb-dark:#0277bd;--orb-glow:rgba(79,195,247,0.4);}
+.skill-orb-mini.laser{--orb-color:#ffb74d;--orb-dark:#e65100;--orb-glow:rgba(255,183,77,0.4);}
+.skill-orb-mini.rewind{--orb-color:#ba68c8;--orb-dark:#6a1b9a;--orb-glow:rgba(186,104,200,0.4);}
+.skill-orb-mini.timewarp{--orb-color:#4db6ac;--orb-dark:#00695c;--orb-glow:rgba(77,182,172,0.4);}
+.skill-orb-mini.ghost{--orb-color:#90a4ae;--orb-dark:#37474f;--orb-glow:rgba(144,164,174,0.4);}
 
 /* Overlay */
-#ov{position:fixed;inset:0;background:rgba(15,31,15,.95);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:20px;}
+#ov{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(15,40,20,0.97) 0%,rgba(8,20,12,0.99) 100%);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:24px;}
 #ov.h{display:none;}
-#ov h2{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:5px;color:var(--gold);}
-#ov p{color:var(--dim);font-size:13px;letter-spacing:1px;}
-.btn{background:var(--accent);border:none;color:#fff;font-family:'Geist',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;padding:12px 28px;cursor:pointer;border-radius:6px;transition:all .15s;}
-.btn:hover{background:#5b9;transform:scale(1.02);}
+#ov h2{font-family:'Bebas Neue',sans-serif;font-size:58px;letter-spacing:6px;color:var(--gold);text-shadow:0 0 40px rgba(228,184,77,0.4),0 4px 8px rgba(0,0,0,0.5);animation:title-glow 3s ease-in-out infinite alternate;}
+@keyframes title-glow{0%{text-shadow:0 0 30px rgba(228,184,77,0.3),0 4px 8px rgba(0,0,0,0.5);}100%{text-shadow:0 0 50px rgba(228,184,77,0.5),0 4px 8px rgba(0,0,0,0.5);}}
+#ov p{color:var(--text-secondary);font-size:14px;letter-spacing:2px;text-transform:uppercase;}
+.btn{background:linear-gradient(135deg,var(--accent) 0%,var(--accent-light) 100%);border:none;color:#fff;font-family:'Geist',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;padding:14px 32px;cursor:pointer;border-radius:10px;transition:all .25s ease;box-shadow:0 4px 15px rgba(62,180,137,0.3),inset 0 1px 0 rgba(255,255,255,0.2);}
+.btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 6px 25px rgba(62,180,137,0.4),inset 0 1px 0 rgba(255,255,255,0.2);}
+.btn:active{transform:translateY(0);box-shadow:0 2px 10px rgba(62,180,137,0.3);}
 
 /* Mode Selection */
-#mode-select{display:flex;gap:20px;margin-top:10px;}
-.mode-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 36px;background:var(--panel);border:2px solid var(--border);border-radius:12px;min-width:160px;transition:all .2s;}
-.mode-btn:hover{background:var(--accent);border-color:var(--accent);transform:scale(1.05);}
-.mode-btn svg{opacity:0.9;}
-.mode-btn span{font-size:16px;font-weight:700;letter-spacing:0.5px;}
-.mode-btn small{font-size:11px;color:var(--dim);font-weight:400;letter-spacing:0;}
-.mode-btn:hover small{color:rgba(255,255,255,0.7);}
+#mode-select{display:flex;gap:24px;margin-top:16px;}
+.mode-btn{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 40px;background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--border-light);border-radius:16px;min-width:170px;transition:all .3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:var(--shadow-md);}
+.mode-btn:hover{background:linear-gradient(135deg,var(--accent) 0%,#2d9a72 100%);border-color:var(--accent-light);transform:translateY(-4px) scale(1.03);box-shadow:var(--shadow-glow),0 12px 30px rgba(0,0,0,0.3);}
+.mode-btn svg{opacity:0.85;transition:all .3s ease;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));}
+.mode-btn:hover svg{opacity:1;transform:scale(1.1);}
+.mode-btn span{font-size:17px;font-weight:800;letter-spacing:0.5px;text-shadow:0 1px 2px rgba(0,0,0,0.2);}
+.mode-btn small{font-size:12px;color:var(--dim);font-weight:500;letter-spacing:0.5px;transition:color .3s ease;}
+.mode-btn:hover small{color:rgba(255,255,255,0.85);}
 
 /* Online Multiplayer Modal */
-#online-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:250;align-items:center;justify-content:center;}
-#online-modal.active{display:flex;}
-#online-modal-box{background:var(--panel);border:2px solid var(--border);border-radius:14px;padding:28px 32px;max-width:420px;width:90%;text-align:center;}
-#online-modal-box h3{font-size:22px;color:var(--gold);margin-bottom:16px;}
-#online-tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--bg-dark);padding:4px;border-radius:8px;}
-.online-tab{flex:1;padding:10px 16px;border:none;background:transparent;color:var(--dim);font-family:'Geist',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border-radius:6px;transition:all .15s;}
-.online-tab:hover{color:var(--text);}
-.online-tab.active{background:var(--accent);color:#fff;}
-#online-status{font-size:13px;color:var(--dim);margin-bottom:16px;padding:8px;background:var(--bg-dark);border-radius:6px;}
-#online-status.connected{color:#4a8;}
-#online-status.error{color:var(--danger);}
-.online-panel{display:none;padding:20px;background:var(--bg-dark);border-radius:8px;min-height:140px;}
-.online-panel.active{display:block;}
-.online-panel p{font-size:13px;color:var(--dim);margin-bottom:16px;}
-#room-code-display{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;}
-#room-code{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;letter-spacing:4px;color:var(--gold);background:var(--panel);padding:8px 16px;border-radius:6px;border:2px solid var(--border);}
-#invite-link-box{display:flex;gap:8px;}
-#invite-link{flex:1;padding:8px 12px;border-radius:6px;border:2px solid var(--border);background:var(--panel);color:var(--text);font-size:11px;font-family:'DM Mono',monospace;}
-#join-input-box{display:flex;gap:8px;justify-content:center;}
-#join-code{width:160px;padding:12px 16px;border-radius:6px;border:2px solid var(--border);background:var(--panel);color:var(--text);font-size:20px;font-family:'DM Mono',monospace;text-align:center;text-transform:uppercase;letter-spacing:3px;}
-#join-code:focus{border-color:var(--gold);outline:none;}
-.btn-small{padding:8px 16px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:all .15s;}
-.btn-small:hover{background:#5b9;}
-.btn-secondary{background:transparent;border:2px solid var(--border);color:var(--dim);margin-top:16px;}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent);background:transparent;}
-.waiting-text{color:var(--gold);font-size:12px;margin-top:12px;animation:pulse 1.5s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+#online-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:250;align-items:center;justify-content:center;}
+#online-modal.active{display:flex;animation:fadeIn .25s ease-out;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+#online-modal-box{background:linear-gradient(180deg,var(--panel-solid) 0%,rgba(18,38,24,0.98) 100%);border:1px solid var(--border-light);border-radius:18px;padding:30px 36px;max-width:440px;width:92%;text-align:center;box-shadow:var(--shadow-lg),0 0 60px rgba(0,0,0,0.5);animation:slideUp .3s ease-out;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+#online-modal-box h3{font-size:24px;color:var(--gold);margin-bottom:20px;text-shadow:var(--shadow-gold);letter-spacing:1px;}
+#online-tabs{display:flex;gap:6px;margin-bottom:18px;background:rgba(0,0,0,0.3);padding:5px;border-radius:10px;box-shadow:inset 0 2px 6px rgba(0,0,0,0.3);}
+.online-tab{flex:1;padding:12px 18px;border:none;background:transparent;color:var(--dim);font-family:'Geist',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border-radius:7px;transition:all .25s ease;}
+.online-tab:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.online-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 4px 12px rgba(62,180,137,0.35);}
+#online-status{font-size:13px;color:var(--dim);margin-bottom:18px;padding:10px 14px;background:rgba(0,0,0,0.25);border-radius:8px;border:1px solid var(--border);letter-spacing:0.5px;}
+#online-status.connected{color:var(--accent-light);border-color:var(--accent);background:rgba(62,180,137,0.1);}
+#online-status.error{color:var(--danger);border-color:var(--danger);background:var(--danger-glow);}
+.online-panel{display:none;padding:22px;background:rgba(0,0,0,0.2);border-radius:12px;min-height:150px;border:1px solid var(--border);}
+.online-panel.active{display:block;animation:fadeIn .2s ease-out;}
+.online-panel p{font-size:14px;color:var(--text-secondary);margin-bottom:18px;}
+#room-code-display{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px;}
+#room-code{font-family:'DM Mono',monospace;font-size:30px;font-weight:700;letter-spacing:5px;color:var(--gold);background:linear-gradient(135deg,var(--panel-solid),rgba(30,50,35,0.9));padding:12px 20px;border-radius:10px;border:2px solid var(--gold-dark);box-shadow:var(--shadow-gold),inset 0 2px 4px rgba(255,255,255,0.05);}
+#invite-link-box{display:flex;gap:10px;}
+#invite-link{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.3);color:var(--text-secondary);font-size:11px;font-family:'DM Mono',monospace;transition:border-color .2s ease;}
+#invite-link:focus{border-color:var(--accent);outline:none;}
+#join-input-box{display:flex;gap:10px;justify-content:center;}
+#join-code{width:170px;padding:14px 18px;border-radius:10px;border:2px solid var(--border);background:rgba(0,0,0,0.3);color:var(--text);font-size:22px;font-family:'DM Mono',monospace;text-align:center;text-transform:uppercase;letter-spacing:4px;transition:all .25s ease;}
+#join-code:focus{border-color:var(--gold);outline:none;box-shadow:0 0 15px rgba(228,184,77,0.2);}
+.btn-small{padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;font-weight:700;font-size:13px;cursor:pointer;transition:all .25s ease;box-shadow:0 3px 10px rgba(62,180,137,0.25);}
+.btn-small:hover{transform:translateY(-1px);box-shadow:0 5px 15px rgba(62,180,137,0.35);}
+.btn-secondary{background:transparent;border:2px solid var(--border);color:var(--dim);margin-top:18px;box-shadow:none;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent-light);background:rgba(62,180,137,0.08);}
+.waiting-text{color:var(--gold-light);font-size:13px;margin-top:14px;font-weight:500;animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
 /* Bang Overlay */
 #bang-overlay {
@@ -227,9 +319,11 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   .ball-tray{gap:3px;}
   #status-text{font-size:11px;}
   #game-area{padding:2px;}
-  #left-panel{left:4px;}
-  #left-panel .label{font-size:9px;}
-  .hold-btn{width:28px;height:22px;font-size:10px;}
+  #left-panel{left:4px;padding:8px 6px;gap:6px;}
+  #left-panel .label{font-size:7px;letter-spacing:1px;}
+  .skill-orb{width:32px;height:32px;}
+  .skill-orb .orb svg{width:16px;height:16px;}
+  .skill-orb::after{display:none;}
   #right-panel{right:4px;gap:4px;}
   #power-meter{width:28px;height:160px;}
   #power-value{font-size:9px;}
@@ -273,16 +367,18 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   25%{transform:rotate(-90deg);}
   50%,75%{transform:rotate(-90deg);}
 }
-#name-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;}
-#name-modal.active{display:flex;}
-#name-modal-box{background:var(--panel);border:2px solid var(--border);border-radius:12px;padding:24px;min-width:280px;text-align:center;}
-#name-modal-box h3{margin-bottom:14px;font-size:18px;color:var(--gold);}
-#name-modal-input{width:100%;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--bg-dark);color:var(--text);font-size:16px;font-family:'Geist',sans-serif;outline:none;text-align:center;}
-#name-modal-input:focus{border-color:var(--gold);}
-#name-modal-btns{display:flex;gap:10px;margin-top:14px;justify-content:center;}
-#name-modal-btns button{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-size:14px;}
-#name-modal-save{background:var(--gold);color:#000;}
+#name-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:200;align-items:center;justify-content:center;}
+#name-modal.active{display:flex;animation:fadeIn .2s ease-out;}
+#name-modal-box{background:linear-gradient(180deg,var(--panel-solid) 0%,rgba(18,38,24,0.98) 100%);border:1px solid var(--border-light);border-radius:16px;padding:28px 32px;min-width:300px;text-align:center;box-shadow:var(--shadow-lg);animation:slideUp .25s ease-out;}
+#name-modal-box h3{margin-bottom:18px;font-size:20px;color:var(--gold);text-shadow:var(--shadow-gold);letter-spacing:0.5px;}
+#name-modal-input{width:100%;padding:12px 16px;border-radius:10px;border:2px solid var(--border);background:rgba(0,0,0,0.3);color:var(--text);font-size:18px;font-family:'Geist',sans-serif;outline:none;text-align:center;transition:all .25s ease;}
+#name-modal-input:focus{border-color:var(--gold);box-shadow:0 0 15px rgba(228,184,77,0.2);}
+#name-modal-btns{display:flex;gap:12px;margin-top:18px;justify-content:center;}
+#name-modal-btns button{padding:10px 24px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:14px;transition:all .25s ease;}
+#name-modal-save{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#000;box-shadow:0 4px 12px rgba(228,184,77,0.3);}
+#name-modal-save:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(228,184,77,0.4);}
 #name-modal-cancel{background:transparent;border:2px solid var(--border) !important;color:var(--dim);}
+#name-modal-cancel:hover{border-color:var(--text-secondary) !important;color:var(--text);}
 </style>
 </head>
 <body>
@@ -328,12 +424,22 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 
   <div id="game-area">
     <div id="left-panel">
-      <div class="label">HOLD</div>
-      <button class="hold-btn">▲</button>
-      <button class="hold-btn">▲</button>
-      <button class="hold-btn">▲</button>
-      <button class="hold-btn">▲</button>
-      <button class="hold-btn">▲</button>
+      <div class="label">SKILLS</div>
+      <button class="skill-orb freeze" data-skill="freeze" data-name="Freeze">
+        <div class="orb"><svg viewBox="0 0 24 24"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z"/></svg></div>
+      </button>
+      <button class="skill-orb laser" data-skill="laser" data-name="Laser Aim">
+        <div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm0-2h2V7h-2z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      </button>
+      <button class="skill-orb rewind" data-skill="rewind" data-name="Rewind">
+        <div class="orb"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></div>
+      </button>
+      <button class="skill-orb timewarp" data-skill="timewarp" data-name="Time Warp">
+        <div class="orb"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+      </button>
+      <button class="skill-orb ghost" data-skill="ghost" data-name="Ghost Ball">
+        <div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 5.58 4 10c0 2.03.76 3.87 2 5.28V21h3v-2h2v2h2v-2h2v2h3v-5.72c1.24-1.41 2-3.25 2-5.28 0-4.42-3.58-8-8-8zm-2 10c-.83 0-1.5-.67-1.5-1.5S9.17 9 10 9s1.5.67 1.5 1.5S10.83 12 10 12zm4 0c-.83 0-1.5-.67-1.5-1.5S13.17 9 14 9s1.5.67 1.5 1.5S14.83 12 14 12z"/></svg></div>
+      </button>
     </div>
 
     <div id="table-container">
@@ -358,17 +464,46 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 
 <div id="controls-modal">
   <div id="controls-modal-box">
-    <h3>🎱 Game Controls</h3>
-    <div class="ctrl-row"><span class="ctrl-key">Mouse Move</span><span class="ctrl-desc">Aim the cue stick</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">Hold Click</span><span class="ctrl-desc">Charge shot power</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">Release Click</span><span class="ctrl-desc">Take the shot</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">Click (placing)</span><span class="ctrl-desc">Place cue ball</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">Click (rolling)</span><span class="ctrl-desc">Fast-forward simulation</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">⏭ Skip Button</span><span class="ctrl-desc">Skip CPU turn or rolling</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">↻ Replay Button</span><span class="ctrl-desc">Replay the last shot</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">🔄 New Game</span><span class="ctrl-desc">Restart the match</span></div>
-    <div class="ctrl-row"><span class="ctrl-key">Player Names</span><span class="ctrl-desc">Click to edit</span></div>
-    <div style="margin-top:14px;font-size:13px;color:var(--dim);text-align:center;">Pot all your balls (solids or stripes), then sink the 8-ball to win!</div>
+    <h3>🎱 Help</h3>
+    <div id="help-tabs">
+      <button class="help-tab active" data-tab="controls">Controls</button>
+      <button class="help-tab" data-tab="skills">Skills</button>
+    </div>
+    <div id="help-controls" class="help-panel active">
+      <div class="ctrl-row"><span class="ctrl-key">Mouse Move</span><span class="ctrl-desc">Aim the cue stick</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Hold Click</span><span class="ctrl-desc">Charge shot power</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Release Click</span><span class="ctrl-desc">Take the shot</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Click (placing)</span><span class="ctrl-desc">Place cue ball</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Click (rolling)</span><span class="ctrl-desc">Fast-forward simulation</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">⏭ Skip Button</span><span class="ctrl-desc">Skip CPU turn or rolling</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">↻ Replay Button</span><span class="ctrl-desc">Replay the last shot</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">🔄 New Game</span><span class="ctrl-desc">Restart the match</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Player Names</span><span class="ctrl-desc">Click to edit</span></div>
+      <div style="margin-top:14px;font-size:13px;color:var(--dim);text-align:center;">Pot all your balls (solids or stripes), then sink the 8-ball to win!</div>
+    </div>
+    <div id="help-skills" class="help-panel">
+      <div class="skill-help-row">
+        <div class="skill-orb-mini freeze"><div class="orb"><svg viewBox="0 0 24 24"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z"/></svg></div></div>
+        <div class="skill-help-text"><strong>Freeze</strong><span>Cue ball stops instantly after hitting target ball</span></div>
+      </div>
+      <div class="skill-help-row">
+        <div class="skill-orb-mini laser"><div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm0-2h2V7h-2z"/><circle cx="12" cy="12" r="3"/></svg></div></div>
+        <div class="skill-help-text"><strong>Laser Aim</strong><span>Extended guideline shows 3 bounces ahead</span></div>
+      </div>
+      <div class="skill-help-row">
+        <div class="skill-orb-mini rewind"><div class="orb"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></div></div>
+        <div class="skill-help-text"><strong>Rewind</strong><span>Undo your last shot and try again</span></div>
+      </div>
+      <div class="skill-help-row">
+        <div class="skill-orb-mini timewarp"><div class="orb"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div></div>
+        <div class="skill-help-text"><strong>Time Warp</strong><span>Slow motion during ball movement</span></div>
+      </div>
+      <div class="skill-help-row">
+        <div class="skill-orb-mini ghost"><div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 5.58 4 10c0 2.03.76 3.87 2 5.28V21h3v-2h2v2h2v-2h2v2h3v-5.72c1.24-1.41 2-3.25 2-5.28 0-4.42-3.58-8-8-8zm-2 10c-.83 0-1.5-.67-1.5-1.5S9.17 9 10 9s1.5.67 1.5 1.5S10.83 12 10 12zm4 0c-.83 0-1.5-.67-1.5-1.5S13.17 9 14 9s1.5.67 1.5 1.5S14.83 12 14 12z"/></svg></div></div>
+        <div class="skill-help-text"><strong>Ghost Ball</strong><span>Cue ball phases through first ball it touches</span></div>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:var(--dim);text-align:center;">Click a skill orb to arm it, then take your shot. Skills reset each game.</div>
+    </div>
     <button id="controls-close">Got it!</button>
   </div>
 </div>
@@ -532,6 +667,21 @@ var replayFrames=[], replayPlaying=false, replayIdx=0, replayPrePhase='';
 let peer = null, conn = null;
 let isOnline = false, isHost = false, myPlayerIdx = 0;
 let roomCode = '';
+
+// Skills System
+const SKILLS = {
+  freeze: { name: 'Freeze', used: [false, false], armed: null },
+  laser: { name: 'Laser Aim', used: [false, false], armed: null },
+  rewind: { name: 'Rewind', used: [false, false], armed: null },
+  timewarp: { name: 'Time Warp', used: [false, false], armed: null },
+  ghost: { name: 'Ghost Ball', used: [false, false], armed: null }
+};
+let activeSkill = null; // Currently armed skill for next shot
+let rewindState = null; // State snapshot for rewind skill
+let timeWarpActive = false; // Slow-mo active
+let ghostBallActive = false; // Ghost phase active
+let laserAimActive = false; // Extended guideline active
+let freezeActive = false; // Stop cue ball after hit
 
 function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -912,6 +1062,19 @@ function resolveCushion(b,silent){
 function resolveBallBall(a,b,silent){
   const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy);
   if(dist>=P.R*2||dist<.001)return;
+
+  // Ghost Ball skill - cue ball phases through first ball
+  const isCueInvolved = a.type==='cue' || b.type==='cue';
+  if(ghostBallActive && isCueInvolved && firstHit===null){
+    // Mark first hit but don't collide - phase through
+    if(a.type==='cue') firstHit=b; else firstHit=a;
+    ghostBallActive = false; // Only one phase-through
+    // Push balls apart slightly so they don't overlap visually
+    const ov=(P.R*2-dist)/2,nx=dx/dist,ny=dy/dist;
+    a.x-=nx*ov*0.5;a.y-=ny*ov*0.5;b.x+=nx*ov*0.5;b.y+=ny*ov*0.5;
+    return; // Skip collision
+  }
+
   if(firstHit===null){if(a.type==='cue')firstHit=b;else if(b.type==='cue')firstHit=a;}
   const ov=(P.R*2-dist)/2,nx=dx/dist,ny=dy/dist;
   a.x-=nx*ov;a.y-=ny*ov;b.x+=nx*ov;b.y+=ny*ov;
@@ -927,6 +1090,14 @@ function resolveBallBall(a,b,silent){
   a.wx+=(J_t*ty*P.R)/P.I;a.wy-=(J_t*tx*P.R)/P.I;
   b.wx-=(J_t*ty*P.R)/P.I;b.wy+=(J_t*tx*P.R)/P.I;
   a.sliding=true;b.sliding=true;
+
+  // Freeze skill - stop cue ball after first collision
+  if(freezeActive && isCueInvolved){
+    const cue = a.type==='cue' ? a : b;
+    cue.vx=0;cue.vy=0;cue.wx=0;cue.wy=0;
+    freezeActive = false;
+  }
+
   if(!silent&&Math.abs(dv_n)>.4)snd_clack(Math.abs(dv_n));
 }
 
@@ -981,6 +1152,9 @@ function shoot(fromNetwork){
   if(isOnline && !fromNetwork) {
     sendNetworkData({ type: 'shoot', angle: aimAngle, power: power });
   }
+
+  // Activate armed skill before shot
+  activateSkillForShot();
 
   const pct=power,spd=(pct/100)*MAX_POWER;
   cueBall.vx=-Math.cos(aimAngle)*spd;cueBall.vy=-Math.sin(aimAngle)*spd;
@@ -1048,6 +1222,7 @@ function afterShot(){
       cueBall.onTable=true;cueBall.vx=0;cueBall.vy=0;
       cueBall.x=BAULK_X;cueBall.y=TH*.5;
       curP=1-curP;phase='placing';
+      updateSkillUI();
       // Show foul overlay
       if(fR.toLowerCase().includes('scratch')) showEvent('SCRATCH!', curP===0?'Your ball in hand':'CPU ball in hand');
       else showEvent('FOUL', fR);
@@ -1057,6 +1232,7 @@ function afterShot(){
         playerStreaks[curP]=0;
         showStreak(0, curP);
         curP=1-curP;
+        updateSkillUI();
       }else{
         playerStreaks[curP]++;
         showStreak(playerStreaks[curP], curP);
@@ -1202,25 +1378,37 @@ function generateTableCache() {
   tCtx.beginPath();tCtx.moveTo(bx+bw,by+cs*0.3);tCtx.lineTo(bx+bw,by+bh-cs*0.3);tCtx.stroke();
 
   // ── 4. PLAYING SURFACE (Felt) ──
-  tCtx.fillStyle='#2a8040'; tCtx.fillRect(bx,by,bw,bh);
-  
-  // Rich Felt noise
+  // Rich base felt gradient
+  const feltGrad = tCtx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W*0.5);
+  feltGrad.addColorStop(0, '#2d8a48');
+  feltGrad.addColorStop(0.5, '#287842');
+  feltGrad.addColorStop(1, '#1f6035');
+  tCtx.fillStyle=feltGrad; tCtx.fillRect(bx,by,bw,bh);
+
+  // Rich Felt noise for texture
   const imgData = tCtx.getImageData(bx, by, bw, bh);
   const data = imgData.data;
   for(let i=0; i<data.length; i+=4){
-    const noise = (Math.random()-0.5)*12;
+    const noise = (Math.random()-0.5)*10;
     data[i] = Math.min(255, Math.max(0, data[i]+noise));
-    data[i+1] = Math.min(255, Math.max(0, data[i+1]+noise));
-    data[i+2] = Math.min(255, Math.max(0, data[i+2]+noise));
+    data[i+1] = Math.min(255, Math.max(0, data[i+1]+noise*1.2));
+    data[i+2] = Math.min(255, Math.max(0, data[i+2]+noise*0.8));
   }
   tCtx.putImageData(imgData, bx, by);
-  
-  // Overhead Lighting (Vignette)
-  const light = tCtx.createRadialGradient(W/2, H/2, bw*0.15, W/2, H/2, W*0.6);
-  light.addColorStop(0, 'rgba(200,255,200,0.08)');
-  light.addColorStop(0.4, 'rgba(0,0,0,0)');
-  light.addColorStop(1, 'rgba(0,0,0,0.5)');
-  tCtx.fillStyle = light; tCtx.fillRect(bx, by, bw, bh);
+
+  // Overhead lamp lighting (warm center glow)
+  const lampLight = tCtx.createRadialGradient(W/2, H/2-bh*0.1, 0, W/2, H/2, bw*0.5);
+  lampLight.addColorStop(0, 'rgba(255,248,220,0.12)');
+  lampLight.addColorStop(0.3, 'rgba(200,255,200,0.06)');
+  lampLight.addColorStop(0.6, 'rgba(0,0,0,0)');
+  tCtx.fillStyle = lampLight; tCtx.fillRect(bx, by, bw, bh);
+
+  // Edge vignette for depth
+  const vignette = tCtx.createRadialGradient(W/2, H/2, bw*0.25, W/2, H/2, W*0.6);
+  vignette.addColorStop(0, 'rgba(0,0,0,0)');
+  vignette.addColorStop(0.7, 'rgba(0,0,0,0.1)');
+  vignette.addColorStop(1, 'rgba(0,0,0,0.45)');
+  tCtx.fillStyle = vignette; tCtx.fillRect(bx, by, bw, bh);
   
   // Cushion inner shadow onto felt (soft edge)
   const shadowW = 12*s;
@@ -1296,12 +1484,12 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   const dx=lx-px,dy=ly-py,dist=Math.hypot(dx,dy);
   const lightInt=Math.max(0.4,Math.min(1,1-dist/(canvas.width*0.7)));
   const nx=dx/(dist||1),ny=dy/(dist||1);
-  const hlx=px+nx*r*0.3,hly=py+ny*r*0.3;
+  const hlx=px+nx*r*0.35,hly=py+ny*r*0.35;
 
-  // Shadow
-  ctx.beginPath();ctx.arc(px+r*.15,py+r*.15,r*1.1,0,Math.PI*2);
-  const sg=ctx.createRadialGradient(px+r*.15,py+r*.15,r*.3,px+r*.15,py+r*.15,r*1.1);
-  sg.addColorStop(0,'rgba(0,0,0,.4)');sg.addColorStop(1,'rgba(0,0,0,0)');
+  // Enhanced shadow with depth layers
+  ctx.beginPath();ctx.arc(px+r*.18,py+r*.18,r*1.15,0,Math.PI*2);
+  const sg=ctx.createRadialGradient(px+r*.18,py+r*.18,r*.2,px+r*.18,py+r*.18,r*1.15);
+  sg.addColorStop(0,'rgba(0,0,0,.5)');sg.addColorStop(0.4,'rgba(0,0,0,.25)');sg.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=sg;ctx.fill();
 
   ctx.save();ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.clip();
@@ -1321,8 +1509,10 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
   const circleR=r*.38*scale;
 
   if(stripe){
-    // White base
-    ctx.fillStyle='#f8f4e8';ctx.fillRect(px-r,py-r,r*2,r*2);
+    // White base with subtle gradient for 3D feel
+    const wg=ctx.createRadialGradient(hlx,hly,r*.1,px,py,r);
+    wg.addColorStop(0,'#ffffff');wg.addColorStop(0.4,'#f8f4e8');wg.addColorStop(1,'#e8e4d8');
+    ctx.fillStyle=wg;ctx.fillRect(px-r,py-r,r*2,r*2);
     // Rotating stripe band - synced with ball rotation
     ctx.save();
     ctx.translate(px,py);
@@ -1332,23 +1522,44 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
     const stripeOffset=Math.sin(rotX)*r*0.5;
     // Maintain strict constant width for the stripe as requested
     const stripeWidth=r*0.7;
-    ctx.fillStyle=color;
+    // Enhanced stripe with gradient
+    const stripeGrad=ctx.createLinearGradient(0,stripeOffset-stripeWidth/2,0,stripeOffset+stripeWidth/2);
+    stripeGrad.addColorStop(0,lc(color,20));stripeGrad.addColorStop(0.5,color);stripeGrad.addColorStop(1,dc(color,25));
+    ctx.fillStyle=stripeGrad;
     ctx.fillRect(-r*1.2,stripeOffset-stripeWidth/2,r*2.4,stripeWidth);
     ctx.restore();
   }else{
     const g=ctx.createRadialGradient(hlx,hly,r*.05,px,py,r);
-    g.addColorStop(0,lc(color,60));g.addColorStop(.5,color);g.addColorStop(1,dc(color,40));
+    g.addColorStop(0,lc(color,70));g.addColorStop(0.35,lc(color,25));g.addColorStop(.6,color);g.addColorStop(1,dc(color,45));
     ctx.fillStyle=g;ctx.fillRect(px-r,py-r,r*2,r*2);
   }
 
-  // Highlight
-  const hlAlpha=0.2+0.2*lightInt;
-  const glow=ctx.createRadialGradient(hlx,hly,0,hlx,hly,r*.35);
-  glow.addColorStop(0,`rgba(255,250,200,${hlAlpha})`);
-  glow.addColorStop(0.5,`rgba(255,240,180,${hlAlpha*.5})`);
-  glow.addColorStop(1,'rgba(255,230,150,0)');
-  ctx.beginPath();ctx.arc(hlx,hly,r*.35,0,Math.PI*2);
+  // Primary specular highlight
+  const hlAlpha=0.25+0.25*lightInt;
+  const glow=ctx.createRadialGradient(hlx,hly,0,hlx,hly,r*.4);
+  glow.addColorStop(0,`rgba(255,255,255,${hlAlpha})`);
+  glow.addColorStop(0.3,`rgba(255,252,245,${hlAlpha*.6})`);
+  glow.addColorStop(0.6,`rgba(255,248,230,${hlAlpha*.2})`);
+  glow.addColorStop(1,'rgba(255,240,200,0)');
+  ctx.beginPath();ctx.arc(hlx,hly,r*.4,0,Math.PI*2);
   ctx.fillStyle=glow;ctx.fill();
+
+  // Secondary soft highlight (ambient reflection)
+  const hlx2=px-nx*r*0.25,hly2=py-ny*r*0.3;
+  const glow2=ctx.createRadialGradient(hlx2,hly2,0,hlx2,hly2,r*.25);
+  glow2.addColorStop(0,`rgba(200,220,255,${lightInt*0.08})`);
+  glow2.addColorStop(1,'rgba(180,200,255,0)');
+  ctx.beginPath();ctx.arc(hlx2,hly2,r*.25,0,Math.PI*2);
+  ctx.fillStyle=glow2;ctx.fill();
+
+  // Rim/fresnel lighting effect
+  const rimGrad=ctx.createRadialGradient(px,py,r*0.75,px,py,r);
+  rimGrad.addColorStop(0,'rgba(255,255,255,0)');
+  rimGrad.addColorStop(0.85,'rgba(255,255,255,0)');
+  rimGrad.addColorStop(1,`rgba(255,255,255,${0.08+lightInt*0.06})`);
+  ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
+  ctx.fillStyle=rimGrad;ctx.fill();
+
   ctx.restore();
 
   // Number
@@ -1356,16 +1567,22 @@ function drawBallAt(px,py,color,stripe,r,num,lx,ly,rotX,rotY){
     const numX=px+surfaceX,numY=py+surfaceY;
     const fs=Math.max(8,Math.round(r*.85*scale));
     const alpha=Math.min(1,surfaceZ*1.4);
+    // Number circle with subtle shadow
+    ctx.beginPath();ctx.arc(numX,numY,circleR+1,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,0,0,${alpha*0.15})`;ctx.fill();
     ctx.beginPath();ctx.arc(numX,numY,circleR,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${alpha*.9})`;ctx.fill();
+    const numCircleGrad=ctx.createRadialGradient(numX-circleR*.2,numY-circleR*.2,0,numX,numY,circleR);
+    numCircleGrad.addColorStop(0,`rgba(255,255,255,${alpha})`);numCircleGrad.addColorStop(1,`rgba(245,242,235,${alpha*.9})`);
+    ctx.fillStyle=numCircleGrad;ctx.fill();
     ctx.font=`800 ${fs}px "Geist",sans-serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillStyle=`rgba(0,0,0,${alpha})`;
     ctx.fillText(num,numX,numY);
   }
 
+  // Subtle edge definition
   ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(0,0,0,.2)';ctx.lineWidth=1;ctx.stroke();
+  ctx.strokeStyle='rgba(0,0,0,.15)';ctx.lineWidth=0.8;ctx.stroke();
 }
 
 function drawAllBalls(){
@@ -1391,13 +1608,17 @@ function drawCue(){
 
   // Aiming line - Raycast bounce prediction
   let rayCX = cueBall.x, rayCY = cueBall.y;
-  let rayDX = -dx, rayDY = -dy; 
+  let rayDX = -dx, rayDY = -dy;
   let targetBall = null;
   let targetGhost = null;
   let lines = [];
-  
-  // Maintain only 1 step/bounce of prediction
-  for(let bounce=0; bounce<2; bounce++) {
+
+  // Laser Aim skill - show more bounces when armed or active
+  const laserArmed = activeSkill === 'laser' || laserAimActive;
+  const maxBounces = laserArmed ? 5 : 2;
+
+  // Raycast bounce prediction
+  for(let bounce=0; bounce<maxBounces; bounce++) {
     let minT = Infinity;
     let hitType = null;
     let hitBall = null;
@@ -1474,37 +1695,83 @@ function drawCue(){
     cueCtx.lineTo(p2.x+pad, p2.y+pad);
     if(l.type==='white'){
       cueCtx.setLineDash([5*s,6*s]);
-      cueCtx.strokeStyle='rgba(255,255,255,.6)';
+      // Laser aim - cyan glow for extended lines
+      if(laserArmed){
+        cueCtx.strokeStyle='rgba(100,220,255,.8)';
+        cueCtx.lineWidth=2.5;
+        cueCtx.shadowColor='#4fc3f7';
+        cueCtx.shadowBlur=6;
+      } else {
+        cueCtx.strokeStyle='rgba(255,255,255,.6)';
+      }
     }else{
       cueCtx.setLineDash([4*s,4*s]);
       cueCtx.strokeStyle='rgba(255,220,0,.8)';
     }
     cueCtx.stroke();
+    cueCtx.shadowBlur=0;
   }
   cueCtx.setLineDash([]);
 
-  // Cue stick
+  // Cue stick with enhanced rendering
   const tx=ox+dx*(BR*s+pull),ty=oy+dy*(BR*s+pull);
   const bx=tx+dx*cueLen,by=ty+dy*cueLen;
+
+  // Cue shadow
+  cueCtx.save();
+  cueCtx.globalAlpha=0.35;
+  cueCtx.beginPath();cueCtx.moveTo(tx+3*s,ty+4*s);cueCtx.lineTo(bx+3*s,by+4*s);
+  cueCtx.strokeStyle='#000';cueCtx.lineWidth=5*s;cueCtx.lineCap='round';cueCtx.stroke();
+  cueCtx.restore();
+
+  // Main cue stick gradient
   const g=cueCtx.createLinearGradient(tx,ty,bx,by);
-  g.addColorStop(0,'#f0e8d0');g.addColorStop(.1,'#c8a060');g.addColorStop(.7,'#6a3a18');g.addColorStop(1,'#3a1a08');
+  g.addColorStop(0,'#faf6e8');g.addColorStop(0.08,'#e8d8b0');g.addColorStop(0.15,'#d4a868');
+  g.addColorStop(0.25,'#b87830');g.addColorStop(0.5,'#6a3a18');g.addColorStop(0.8,'#4a2810');g.addColorStop(1,'#2a1408');
   cueCtx.beginPath();cueCtx.moveTo(tx,ty);cueCtx.lineTo(bx,by);
-  cueCtx.strokeStyle=g;cueCtx.lineWidth=4*s;cueCtx.lineCap='round';cueCtx.stroke();
-  cueCtx.beginPath();cueCtx.arc(tx,ty,2.5*s,0,Math.PI*2);cueCtx.fillStyle='#5090b0';cueCtx.fill();
+  cueCtx.strokeStyle=g;cueCtx.lineWidth=5*s;cueCtx.lineCap='round';cueCtx.stroke();
+
+  // Cue highlight (glossy effect)
+  cueCtx.save();
+  cueCtx.globalAlpha=0.4;
+  const perpX2=-dy,perpY2=dx;
+  cueCtx.beginPath();cueCtx.moveTo(tx+perpX2*1.5*s,ty+perpY2*1.5*s);cueCtx.lineTo(bx+perpX2*1.5*s,by+perpY2*1.5*s);
+  cueCtx.strokeStyle='rgba(255,255,255,0.5)';cueCtx.lineWidth=1*s;cueCtx.stroke();
+  cueCtx.restore();
+
+  // Cue tip (ferrule and tip)
+  cueCtx.beginPath();cueCtx.arc(tx,ty,3*s,0,Math.PI*2);
+  const tipGrad=cueCtx.createRadialGradient(tx-1*s,ty-1*s,0,tx,ty,3*s);
+  tipGrad.addColorStop(0,'#7ab8d8');tipGrad.addColorStop(0.5,'#5098b8');tipGrad.addColorStop(1,'#3878a0');
+  cueCtx.fillStyle=tipGrad;cueCtx.fill();
+  cueCtx.strokeStyle='rgba(0,0,0,0.3)';cueCtx.lineWidth=0.5;cueCtx.stroke();
 
   // Mini power bar hovering above the cue ball
   if(charging || power > 0){
-    const barLen = 50*s, barH = 5*s;
+    const barLen = 54*s, barH = 6*s;
     const ballPos = tc(cueBall.x, cueBall.y);
-    const mbx = ballPos.x + pad, mby = ballPos.y + pad - BR*s - 12*s;
-    
-    // Background
+    const mbx = ballPos.x + pad, mby = ballPos.y + pad - BR*s - 14*s;
+
+    // Drop shadow
     cueCtx.save();
-    cueCtx.fillStyle='rgba(0,0,0,0.55)';
+    cueCtx.globalAlpha=0.4;
+    cueCtx.fillStyle='#000';
+    cueCtx.beginPath();
+    cueCtx.roundRect(mbx - barLen/2 + 1*s, mby - barH/2 + 2*s, barLen, barH, barH/2);
+    cueCtx.fill();
+    cueCtx.restore();
+
+    // Background with glass effect
+    cueCtx.save();
+    cueCtx.fillStyle='rgba(0,0,0,0.65)';
     cueCtx.beginPath();
     cueCtx.roundRect(mbx - barLen/2, mby - barH/2, barLen, barH, barH/2);
     cueCtx.fill();
-    
+    // Inner highlight
+    cueCtx.strokeStyle='rgba(255,255,255,0.1)';
+    cueCtx.lineWidth=0.5;
+    cueCtx.stroke();
+
     // Fill with full gradient matching the power meter
     const pct = power/100;
     const fillW = barLen * pct;
@@ -1519,6 +1786,15 @@ function drawCue(){
       cueCtx.beginPath();
       cueCtx.roundRect(mbx - barLen/2, mby - barH/2, fillW, barH, barH/2);
       cueCtx.fill();
+
+      // Glow effect on fill
+      const lastColorIdx = Math.min(Math.floor(pct * (colors.length-1)), colors.length-1);
+      cueCtx.shadowColor = colors[lastColorIdx];
+      cueCtx.shadowBlur = 8*s;
+      cueCtx.beginPath();
+      cueCtx.roundRect(mbx - barLen/2, mby - barH/2, fillW, barH, barH/2);
+      cueCtx.fill();
+      cueCtx.shadowBlur = 0;
     }
     cueCtx.restore();
   }
@@ -1790,11 +2066,17 @@ function loop(){
     else{
       // Store previous positions for interpolation
       for(const b of balls){b.px=b.x;b.py=b.y;b.protX=b.rotX;b.protY=b.rotY;}
-      for(let i=0;i<8;i++){step();if(!isMoving())break;}
+      // Time Warp skill - slow motion (run fewer physics steps)
+      const stepsToRun = timeWarpActive ? 3 : 8;
+      for(let i=0;i<stepsToRun;i++){step();if(!isMoving())break;}
       // Record frame for replay (every 2nd frame to save memory)
       if(rollFrames%2===0) replayFrames.push(balls.map(b=>({x:b.x,y:b.y,onTable:b.onTable,rotX:b.rotX,rotY:b.rotY,type:b.type,num:b.num,cIdx:b.cIdx,stripe:b.stripe})));
     }
-    if(!isMoving())phase='done';
+    if(!isMoving()){
+      phase='done';
+      timeWarpActive = false; // Reset time warp when balls stop
+      laserAimActive = false; // Reset laser aim when balls stop
+    }
   }
   else if(phase==='done'){afterShot();}
   
@@ -1850,6 +2132,7 @@ function startGame(mode){
     document.getElementById('p2-avatar').textContent = 'P2';
   }
   setupGame();
+  resetSkills();
   document.getElementById('ov').classList.add('h');
 }
 
@@ -1867,9 +2150,132 @@ document.getElementById('controls-label').addEventListener('click',function(){
 document.getElementById('controls-close').addEventListener('click',function(){
   document.getElementById('controls-modal').classList.remove('active');
 });
+
+// Help tabs switching
+document.querySelectorAll('.help-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.help-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.help-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('help-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Skill orb click handlers
+document.querySelectorAll('.skill-orb').forEach(orb => {
+  orb.addEventListener('click', () => {
+    const skill = orb.dataset.skill;
+    if(orb.classList.contains('used')) return; // Can't use spent skills
+    if(phase !== 'aiming' || isAI[curP]) return; // Only during player's aiming phase
+
+    // Toggle armed state
+    document.querySelectorAll('.skill-orb').forEach(o => o.classList.remove('armed'));
+    if(activeSkill === skill) {
+      activeSkill = null;
+    } else {
+      activeSkill = skill;
+      orb.classList.add('armed');
+    }
+  });
+});
+
+function resetSkills() {
+  Object.keys(SKILLS).forEach(key => {
+    SKILLS[key].used = [false, false];
+  });
+  activeSkill = null;
+  rewindState = null;
+  timeWarpActive = false;
+  ghostBallActive = false;
+  laserAimActive = false;
+  freezeActive = false;
+  updateSkillUI();
+}
+
+function updateSkillUI() {
+  document.querySelectorAll('.skill-orb').forEach(orb => {
+    const skill = orb.dataset.skill;
+    const isUsed = SKILLS[skill].used[curP];
+    orb.classList.toggle('used', isUsed);
+    orb.classList.toggle('armed', activeSkill === skill && !isUsed);
+  });
+}
+
+function activateSkillForShot() {
+  if(!activeSkill) return;
+  const skill = activeSkill;
+
+  // Mark as used for current player
+  SKILLS[skill].used[curP] = true;
+
+  // Activate skill effect
+  switch(skill) {
+    case 'freeze':
+      freezeActive = true;
+      break;
+    case 'laser':
+      laserAimActive = true; // Already active during aim, just mark used
+      break;
+    case 'rewind':
+      // Save state before shot for potential rewind
+      rewindState = {
+        balls: balls.map(b => ({...b})),
+        curP: curP,
+        groups: [...groups],
+        openTable: openTable,
+        firstHit: firstHit,
+        pottedShot: [...pottedShot],
+        phase: phase
+      };
+      break;
+    case 'timewarp':
+      timeWarpActive = true;
+      break;
+    case 'ghost':
+      ghostBallActive = true;
+      break;
+  }
+
+  activeSkill = null;
+  updateSkillUI();
+}
+
+function useRewind() {
+  if(!rewindState) return false;
+  balls = rewindState.balls.map(b => ({...b}));
+  cueBall = balls.find(b => b.num === 0);
+  curP = rewindState.curP;
+  groups = [...rewindState.groups];
+  openTable = rewindState.openTable;
+  firstHit = rewindState.firstHit;
+  pottedShot = [...rewindState.pottedShot];
+  phase = 'aiming';
+  rewindState = null;
+  power = 0;
+  charging = false;
+  updateSkillUI();
+  return true;
+}
 document.getElementById('breplay').addEventListener('click',function(){
+  // If rewind state is available and we just finished a shot, use rewind
+  if(rewindState && (phase==='aiming' || phase==='placing')){
+    if(useRewind()){
+      showEvent('REWIND!', 'Shot undone');
+      return;
+    }
+  }
   if(replayFrames.length>0 && !replayPlaying && phase!=='rolling'){
     replayPlaying=true;replayIdx=0;
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e){
+  // Z key for rewind
+  if(e.key.toLowerCase() === 'z' && rewindState && (phase==='aiming' || phase==='placing')){
+    if(useRewind()){
+      showEvent('REWIND!', 'Shot undone');
+    }
   }
 });
 
