@@ -449,6 +449,7 @@ let groups=[null,null],openTable=true;
 let firstHit=null,pottedShot=[];
 let foulMsg='',turnMsg='',extraMsg='';
 let freeBall=false,power=0,charging=false,aimAngle=0,spinX=0,spinY=0;
+let mousePos={x:0,y:0}; // Track actual cursor position
 let gameTime=0,timerInterval=null,rollFrames=0;
 let aiTargetAngle=0,aiTargetPower=0,aiState='idle';
 let playerStreaks=[0,0];
@@ -1276,6 +1277,27 @@ function drawCue(){
     cueCtx.rotate(aimAngle - Math.PI/2);
     cueCtx.drawImage(aimCursorImg, -cursorSize/2, -cursorSize/2, cursorSize, cursorSize);
     cueCtx.restore();
+
+    // Subtle indicator showing actual mouse position
+    const mx = mousePos.x + pad, my = mousePos.y + pad;
+    cueCtx.save();
+    cueCtx.globalAlpha = 0.4;
+    // Small crosshair
+    cueCtx.strokeStyle = '#fff';
+    cueCtx.lineWidth = 1.5;
+    const crossSize = 6 * s;
+    cueCtx.beginPath();
+    cueCtx.moveTo(mx - crossSize, my);
+    cueCtx.lineTo(mx + crossSize, my);
+    cueCtx.moveTo(mx, my - crossSize);
+    cueCtx.lineTo(mx, my + crossSize);
+    cueCtx.stroke();
+    // Center dot
+    cueCtx.beginPath();
+    cueCtx.arc(mx, my, 2 * s, 0, Math.PI * 2);
+    cueCtx.fillStyle = '#fff';
+    cueCtx.fill();
+    cueCtx.restore();
   }
 }
 
@@ -1342,6 +1364,7 @@ function updateBallTrays(){
 
 // Input
 function handlePointerMove(sx,sy){
+  mousePos.x = sx; mousePos.y = sy; // Track actual cursor position
   if(phase==='aiming'&&cueBall&&cueBall.onTable){
     const p=tc(cueBall.x,cueBall.y);aimAngle=Math.atan2(sy-p.y,sx-p.x);
   }
