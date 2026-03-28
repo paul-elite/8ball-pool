@@ -160,6 +160,31 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .mode-btn small{font-size:11px;color:var(--dim);font-weight:400;letter-spacing:0;}
 .mode-btn:hover small{color:rgba(255,255,255,0.7);}
 
+/* Online Multiplayer Modal */
+#online-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:250;align-items:center;justify-content:center;}
+#online-modal.active{display:flex;}
+#online-modal-box{background:var(--panel);border:2px solid var(--border);border-radius:14px;padding:28px 32px;max-width:420px;width:90%;text-align:center;}
+#online-modal-box h3{font-size:22px;color:var(--gold);margin-bottom:16px;}
+#online-status{font-size:13px;color:var(--dim);margin-bottom:20px;padding:8px;background:var(--bg-dark);border-radius:6px;}
+#online-status.connected{color:#4a8;}
+#online-status.error{color:var(--danger);}
+.online-section{margin:20px 0;padding:16px;background:var(--bg-dark);border-radius:8px;}
+.online-section p{font-size:13px;color:var(--dim);margin-bottom:12px;}
+#room-code-display{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;}
+#room-code{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;letter-spacing:4px;color:var(--gold);background:var(--panel);padding:8px 16px;border-radius:6px;border:2px solid var(--border);}
+#invite-link-box{display:flex;gap:8px;}
+#invite-link{flex:1;padding:8px 12px;border-radius:6px;border:2px solid var(--border);background:var(--panel);color:var(--text);font-size:12px;font-family:'DM Mono',monospace;}
+#join-input-box{display:flex;gap:8px;justify-content:center;}
+#join-code{width:140px;padding:10px 14px;border-radius:6px;border:2px solid var(--border);background:var(--panel);color:var(--text);font-size:18px;font-family:'DM Mono',monospace;text-align:center;text-transform:uppercase;letter-spacing:2px;}
+#join-code:focus{border-color:var(--gold);outline:none;}
+.btn-small{padding:8px 16px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:all .15s;}
+.btn-small:hover{background:#5b9;}
+.btn-secondary{background:transparent;border:2px solid var(--border);color:var(--dim);margin-top:16px;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);background:transparent;}
+.waiting-text{color:var(--gold);font-size:12px;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+#online-join{border-top:1px solid var(--border);margin-top:0;padding-top:20px;}
+
 /* Bang Overlay */
 #bang-overlay {
   position: fixed;
@@ -354,11 +379,47 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
       <span>Single Player</span>
       <small>Play vs CPU</small>
     </button>
-    <button class="btn mode-btn" id="btn-multi">
+    <button class="btn mode-btn" id="btn-local">
       <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-      <span>Multiplayer</span>
-      <small>Play vs Friend</small>
+      <span>Local 2P</span>
+      <small>Same Device</small>
     </button>
+    <button class="btn mode-btn" id="btn-online">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span>Online</span>
+      <small>Invite Friend</small>
+    </button>
+  </div>
+</div>
+
+<!-- Online Multiplayer Modal -->
+<div id="online-modal">
+  <div id="online-modal-box">
+    <h3>🌐 Online Multiplayer</h3>
+    <div id="online-status">Connecting...</div>
+
+    <div id="online-host" class="online-section">
+      <p>Host a game and invite your friend:</p>
+      <div id="room-code-display">
+        <span id="room-code">------</span>
+        <button id="copy-code" class="btn-small">Copy</button>
+      </div>
+      <div id="invite-link-box">
+        <input type="text" id="invite-link" readonly>
+        <button id="copy-link" class="btn-small">Copy Link</button>
+      </div>
+      <p class="waiting-text" id="waiting-text">Waiting for opponent...</p>
+    </div>
+
+    <div id="online-join" class="online-section">
+      <p>Or join a friend's game:</p>
+      <div id="join-input-box">
+        <input type="text" id="join-code" placeholder="Enter room code" maxlength="6">
+        <button id="join-btn" class="btn-small">Join</button>
+      </div>
+    </div>
+
+    <button id="online-cancel" class="btn btn-secondary">Cancel</button>
   </div>
 </div>
 
@@ -397,6 +458,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 </div>
 <div id="event-overlay"></div>
 
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
 // Force landscape orientation
 try { screen.orientation.lock('landscape').catch(()=>{}); } catch(e){}
@@ -455,6 +517,183 @@ let gameTime=0,timerInterval=null,rollFrames=0;
 let aiTargetAngle=0,aiTargetPower=0,aiState='idle';
 let playerStreaks=[0,0];
 var replayFrames=[], replayPlaying=false, replayIdx=0, replayPrePhase='';
+
+// Online Multiplayer State
+let peer = null, conn = null;
+let isOnline = false, isHost = false, myPlayerIdx = 0;
+let roomCode = '';
+
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for(let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function initPeer(id) {
+  return new Promise((resolve, reject) => {
+    peer = new Peer(id, { debug: 0 });
+    peer.on('open', () => resolve(peer));
+    peer.on('error', err => reject(err));
+  });
+}
+
+function showOnlineModal() {
+  document.getElementById('online-modal').classList.add('active');
+  document.getElementById('online-status').textContent = 'Connecting to server...';
+  document.getElementById('online-status').className = '';
+  document.getElementById('waiting-text').style.display = 'none';
+
+  roomCode = generateRoomCode();
+  const peerId = 'pool8ball_' + roomCode;
+
+  initPeer(peerId).then(() => {
+    document.getElementById('online-status').textContent = 'Connected! Share your room code:';
+    document.getElementById('online-status').classList.add('connected');
+    document.getElementById('room-code').textContent = roomCode;
+    document.getElementById('waiting-text').style.display = 'block';
+
+    const url = window.location.origin + window.location.pathname + '?room=' + roomCode;
+    document.getElementById('invite-link').value = url;
+
+    isHost = true;
+    myPlayerIdx = 0;
+
+    peer.on('connection', handleIncomingConnection);
+  }).catch(err => {
+    document.getElementById('online-status').textContent = 'Connection failed: ' + err.message;
+    document.getElementById('online-status').classList.add('error');
+  });
+}
+
+function handleIncomingConnection(connection) {
+  conn = connection;
+  setupConnection();
+  // Start the game as host
+  document.getElementById('online-modal').classList.remove('active');
+  startOnlineGame();
+}
+
+function joinRoom(code) {
+  document.getElementById('online-status').textContent = 'Joining room...';
+
+  const peerId = 'pool8ball_guest_' + Date.now();
+  const hostId = 'pool8ball_' + code.toUpperCase();
+
+  initPeer(peerId).then(() => {
+    conn = peer.connect(hostId, { reliable: true });
+    conn.on('open', () => {
+      isHost = false;
+      myPlayerIdx = 1;
+      setupConnection();
+      document.getElementById('online-modal').classList.remove('active');
+      startOnlineGame();
+    });
+    conn.on('error', err => {
+      document.getElementById('online-status').textContent = 'Failed to join: ' + err.message;
+      document.getElementById('online-status').classList.add('error');
+    });
+  }).catch(err => {
+    document.getElementById('online-status').textContent = 'Connection failed: ' + err.message;
+    document.getElementById('online-status').classList.add('error');
+  });
+}
+
+function setupConnection() {
+  conn.on('data', handleNetworkData);
+  conn.on('close', () => {
+    showEvent('OPPONENT LEFT', 'Connection closed');
+    isOnline = false;
+    conn = null;
+  });
+}
+
+function handleNetworkData(data) {
+  if(data.type === 'gameState') {
+    // Sync full game state from host
+    balls = data.balls;
+    cueBall = balls.find(b => b.type === 'cue');
+    phase = data.phase;
+    curP = data.curP;
+    groups = data.groups;
+    openTable = data.openTable;
+    allPotted = data.allPotted;
+    foulMsg = data.foulMsg;
+    turnMsg = data.turnMsg;
+    updateUI();
+    updateBallTrays();
+  } else if(data.type === 'aim') {
+    aimAngle = data.angle;
+  } else if(data.type === 'shoot') {
+    aimAngle = data.angle;
+    power = data.power;
+    shoot(true); // fromNetwork = true
+  } else if(data.type === 'placeBall') {
+    if(cueBall) {
+      cueBall.x = data.x;
+      cueBall.y = data.y;
+    }
+  } else if(data.type === 'confirmPlace') {
+    phase = 'aiming';
+    foulMsg = '';
+    updateUI();
+  }
+}
+
+function sendNetworkData(data) {
+  if(conn && conn.open) {
+    conn.send(data);
+  }
+}
+
+function syncGameState() {
+  if(!isOnline || !isHost) return;
+  sendNetworkData({
+    type: 'gameState',
+    balls: balls.map(b => ({...b})),
+    phase, curP, groups, openTable, allPotted, foulMsg, turnMsg
+  });
+}
+
+function startOnlineGame() {
+  isOnline = true;
+  gameMode = 'online';
+  isAI = [false, false];
+
+  document.getElementById('p1-name').textContent = isHost ? 'You' : 'Opponent';
+  document.getElementById('p2-name').textContent = isHost ? 'Opponent' : 'You';
+  document.getElementById('p1-avatar').textContent = isHost ? 'P1' : 'P2';
+  document.getElementById('p2-avatar').textContent = isHost ? 'P2' : 'P1';
+
+  if(isHost) {
+    setupGame();
+    setTimeout(() => syncGameState(), 500);
+  }
+
+  document.getElementById('ov').classList.add('h');
+}
+
+function closeOnlineModal() {
+  document.getElementById('online-modal').classList.remove('active');
+  if(peer) {
+    peer.destroy();
+    peer = null;
+  }
+  conn = null;
+  isOnline = false;
+}
+
+// Check URL for room code on load
+function checkUrlForRoom() {
+  const params = new URLSearchParams(window.location.search);
+  const room = params.get('room');
+  if(room) {
+    document.getElementById('ov').style.display = 'none';
+    showOnlineModal();
+    document.getElementById('join-code').value = room;
+    setTimeout(() => joinRoom(room), 500);
+  }
+}
 
 function showStreak(count, pIdx) {
   if (count === 0) {
@@ -718,8 +957,16 @@ function step(silent){
 function fastForward(){if(phase!=='rolling')return;let safety=0;while(isMoving()&&safety<5000){step(true);safety++;}phase='done';}
 
 // Shoot
-function shoot(){
+function shoot(fromNetwork){
   if(!cueBall||!cueBall.onTable||phase!=='aiming')return;
+  // In online mode, only shoot if it's our turn (unless triggered from network)
+  if(isOnline && !fromNetwork && curP !== myPlayerIdx) return;
+
+  // Send shot data to opponent
+  if(isOnline && !fromNetwork) {
+    sendNetworkData({ type: 'shoot', angle: aimAngle, power: power });
+  }
+
   const pct=power,spd=(pct/100)*MAX_POWER;
   cueBall.vx=-Math.cos(aimAngle)*spd;cueBall.vy=-Math.sin(aimAngle)*spd;
   const sc=spd*2.5/P.R;
@@ -822,7 +1069,9 @@ function afterShot(){
     }
     const mg=myGroup(),ne=needEight();
     turnMsg=`${curP===0?'Player 1':'CPU'} — ${openTable?'any ball':ne?'8-ball':mg+'s'}`;
-    updateUI();updateBallTrays();return;
+    updateUI();updateBallTrays();
+    if(isOnline && isHost) syncGameState();
+    return;
   }
 
   const winner=win?curP:1-curP;
@@ -1366,10 +1615,17 @@ function updateBallTrays(){
 // Input
 function handlePointerMove(sx,sy){
   mousePos.x = sx; mousePos.y = sy; // Track actual cursor position
-  if(phase==='aiming'&&cueBall&&cueBall.onTable){
+  // In online mode, only allow input if it's our turn
+  const canInput = !isOnline || curP === myPlayerIdx;
+
+  if(phase==='aiming'&&cueBall&&cueBall.onTable&&canInput){
     const p=tc(cueBall.x,cueBall.y);aimAngle=Math.atan2(sy-p.y,sx-p.x);
+    // Send aim updates to opponent (throttled)
+    if(isOnline && Math.random() < 0.1) {
+      sendNetworkData({ type: 'aim', angle: aimAngle });
+    }
   }
-  if(phase==='placing'&&cueBall){
+  if(phase==='placing'&&cueBall&&canInput){
     const t=ct(sx,sy);
     if(freeBall){cueBall.x=Math.max(BR,Math.min(TW-BR,t.x));cueBall.y=Math.max(BR,Math.min(TH-BR,t.y));}
     else{
@@ -1378,14 +1634,21 @@ function handlePointerMove(sx,sy){
       if(dist>D_RADIUS-BR){const a=Math.atan2(ty-TH*.5,tx-BAULK_X);tx=BAULK_X+Math.cos(a)*(D_RADIUS-BR);ty=TH*.5+Math.sin(a)*(D_RADIUS-BR);}
       cueBall.x=Math.max(BR,Math.min(BAULK_X,tx));cueBall.y=ty;
     }
+    // Send ball position to opponent
+    if(isOnline) {
+      sendNetworkData({ type: 'placeBall', x: cueBall.x, y: cueBall.y });
+    }
   }
 }
 function handlePointerDown(){
   getAC();
   if(phase==='rolling'){fastForward();return;}
-  if(phase==='aiming'&&!isAI[curP])charging=true;
-  if(phase==='placing'&&!isAI[curP]){
+
+  const canInput = !isOnline || curP === myPlayerIdx;
+  if(phase==='aiming'&&!isAI[curP]&&canInput)charging=true;
+  if(phase==='placing'&&!isAI[curP]&&canInput){
     phase='aiming';foulMsg='';
+    if(isOnline) sendNetworkData({ type: 'confirmPlace' });
     const mg=myGroup(),ne=needEight();
     turnMsg=`Player 1 — ${openTable?'any ball':ne?'8-ball':mg+'s'}`;
     updateUI();
@@ -1557,13 +1820,18 @@ let gameMode = 'single'; // 'single' or 'multi'
 
 function startGame(mode){
   gameMode = mode || 'single';
+  isOnline = false;
   if(gameMode === 'single'){
     isAI = [false, true];
+    document.getElementById('p1-name').textContent = 'Player 1';
     document.getElementById('p2-name').textContent = 'CPU';
+    document.getElementById('p1-avatar').textContent = 'P1';
     document.getElementById('p2-avatar').textContent = 'AI';
   } else {
     isAI = [false, false];
+    document.getElementById('p1-name').textContent = 'Player 1';
     document.getElementById('p2-name').textContent = 'Player 2';
+    document.getElementById('p1-avatar').textContent = 'P1';
     document.getElementById('p2-avatar').textContent = 'P2';
   }
   setupGame();
@@ -1571,8 +1839,12 @@ function startGame(mode){
 }
 
 document.getElementById('btn-single').addEventListener('click', () => startGame('single'));
-document.getElementById('btn-multi').addEventListener('click', () => startGame('multi'));
-document.getElementById('bng').addEventListener('click', () => startGame(gameMode));
+document.getElementById('btn-local').addEventListener('click', () => startGame('local'));
+document.getElementById('btn-online').addEventListener('click', showOnlineModal);
+document.getElementById('bng').addEventListener('click', () => {
+  if(isOnline) return; // Don't restart online games this way
+  startGame(gameMode);
+});
 document.getElementById('bskip').addEventListener('click',skipAction);
 document.getElementById('controls-label').addEventListener('click',function(){
   document.getElementById('controls-modal').classList.add('active');
@@ -1585,6 +1857,32 @@ document.getElementById('breplay').addEventListener('click',function(){
     replayPlaying=true;replayIdx=0;
   }
 });
+
+// Online modal event listeners
+document.getElementById('copy-code').addEventListener('click', () => {
+  navigator.clipboard.writeText(roomCode);
+  document.getElementById('copy-code').textContent = 'Copied!';
+  setTimeout(() => document.getElementById('copy-code').textContent = 'Copy', 1500);
+});
+document.getElementById('copy-link').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('invite-link').value);
+  document.getElementById('copy-link').textContent = 'Copied!';
+  setTimeout(() => document.getElementById('copy-link').textContent = 'Copy Link', 1500);
+});
+document.getElementById('join-btn').addEventListener('click', () => {
+  const code = document.getElementById('join-code').value.trim();
+  if(code.length >= 4) joinRoom(code);
+});
+document.getElementById('join-code').addEventListener('keydown', e => {
+  if(e.key === 'Enter') {
+    const code = document.getElementById('join-code').value.trim();
+    if(code.length >= 4) joinRoom(code);
+  }
+});
+document.getElementById('online-cancel').addEventListener('click', closeOnlineModal);
+
+// Check for room code in URL on page load
+setTimeout(checkUrlForRoom, 100);
 
 // Name editing modal
 var editingNameEl = null;
