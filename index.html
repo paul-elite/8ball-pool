@@ -350,7 +350,9 @@ button{touch-action:manipulation;}
   input{font-size:16px!important;}
 }
 #rotate-overlay{display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:24px;}
-#rotate-overlay .rotate-icon{font-size:54px;}
+#rotate-overlay .rotate-icon{font-size:54px;animation:rotate-phone 2.4s ease-in-out infinite;}
+@keyframes rotate-phone{0%,15%,100%{transform:rotate(0deg);}40%,75%{transform:rotate(-90deg);}}
+@media(prefers-reduced-motion:reduce){#rotate-overlay .rotate-icon{animation:none;transform:rotate(-90deg);}}
 #rotate-overlay p{max-width:280px;line-height:1.6;}
 @media (max-width:1000px) and (orientation:portrait){
   #app,#ov,#online-modal,#name-modal{visibility:hidden;}
@@ -402,7 +404,7 @@ button{touch-action:manipulation;}
     </linearGradient>
   </defs>
 </svg>
-<div id="rotate-overlay"><div class="rotate-icon">↻</div><h2>Turn to landscape</h2><p>Rotate your phone or widen this window to play. Your match stays here.</p></div>
+<div id="rotate-overlay"><div class="rotate-icon" aria-hidden="true">📱</div><h2>Turn to landscape</h2><p>Rotate your phone or widen this window to play. Your match stays here.</p></div>
 <div id="app">
   <div id="header">
     <div class="player-info" id="p1-info">
