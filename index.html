@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>8-Ball Pool</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23111'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%23fff'/%3E%3Ctext x='32' y='37' text-anchor='middle' font-family='Arial,sans-serif' font-weight='bold' font-size='16' fill='%23111'%3E8%3C/text%3E%3Ccircle cx='22' cy='18' r='6' fill='%23333' opacity='0.4'/%3E%3C/svg%3E">
 <style>
@@ -301,67 +301,79 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
   animation: pop-bang 0.5s ease-out forwards;
 }
 
-/* Mobile - Landscape (the game mode) */
-@media (max-width:900px) and (orientation:landscape){
-  #app{padding:4px;}
-  #header{padding:2px 8px;}
-  .avatar{width:30px;height:30px;font-size:12px;border-width:2px;}
-  .player-name{font-size:13px;}
-  .player-bar{width:70px;height:6px;margin-top:3px;}
-  .player-info{gap:6px;}
-  #timer{padding:3px 10px;font-size:12px;}
-  #ball-tray-row{padding:2px 8px;margin-top:1px;}
-  .ball-slot{width:18px;height:18px;font-size:7px;}
+/* Mobile controls stay available in both orientations. */
+#mobile-shot{display:none;touch-action:none;min-height:44px;border:1px solid var(--gold-dark);border-radius:10px;background:var(--gold);color:#15251a;font:700 12px 'Geist',sans-serif;padding:10px;}
+#app{height:100dvh;}
+#game-area{min-height:0;min-width:0;overflow:hidden;}
+#c{touch-action:none;}
+button{touch-action:manipulation;}
+#ov,#online-modal,#controls-modal,#name-modal{padding:12px;overflow-y:auto;}
+#online-modal-box,#controls-modal-box,#name-modal-box{max-height:calc(100dvh - 24px);overflow-y:auto;min-width:0;}
+#invite-link{min-width:0;}
+@media (max-width:1000px), (pointer:coarse){
+  #app{padding:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));}
+  #header{padding:6px 8px;margin-bottom:5px;gap:6px;}
+  .player-info{gap:6px;min-width:0;}
+  .avatar{width:32px;height:32px;flex-shrink:0;font-size:12px;border-width:2px;}
+  .player-name{font-size:12px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:24px;display:flex;align-items:center;}
+  .player-bar{width:60px;height:5px;margin-top:2px;}
+  #timer{font-size:12px;padding:6px;letter-spacing:1px;}
+  #ball-tray-row{padding:5px;gap:6px;flex-shrink:0;}
   .ball-tray{gap:3px;}
-  #status-text{font-size:11px;}
-  #game-area{padding:2px;}
-  #left-panel{left:4px;padding:8px 6px;gap:6px;}
-  #left-panel .label{font-size:7px;letter-spacing:1px;}
-  .skill-orb{width:32px;height:32px;}
-  .skill-orb .orb svg{width:16px;height:16px;}
-  .skill-orb::after{display:none;}
-  #right-panel{right:4px;gap:4px;}
-  #power-meter{width:28px;height:160px;}
-  #power-value{font-size:9px;}
-  #bottom-bar{padding:4px 8px;gap:10px;}
-  #bottom-bar .icon-btn{width:32px;height:32px;}
-  #controls-label{font-size:12px;right:8px;}
-  #controls-label svg{width:16px;height:16px;}
-  #mode-select{gap:12px;}
-  .mode-btn{padding:16px 24px;min-width:120px;}
-  .mode-btn svg{width:22px;height:22px;}
-  .mode-btn span{font-size:13px;}
-  .mode-btn small{font-size:9px;}
-  #ov h2{font-size:36px;}
+  .ball-slot{width:17px;height:17px;flex-shrink:0;font-size:8px;border-width:1px;}
+  #status-text{font-size:11px;line-height:1.4;}
+  #game-area{padding:0;}
+  #left-panel{left:0;padding:5px;gap:3px;display:grid;grid-template-columns:repeat(2,44px);}
+  #left-panel .label{grid-column:1/-1;text-align:center;}
+  .skill-gem{width:44px;height:44px;}
+  .skill-gem::after{display:none;}
+  #right-panel{right:0;padding:6px;gap:5px;width:76px;}
+  #power-meter{width:24px;height:90px;}
+  #mobile-shot{display:block;width:100%;}
+  #bottom-bar{padding:4px;gap:5px;flex-shrink:0;flex-wrap:wrap;}
+  #bottom-bar .icon-btn{width:44px;height:44px;flex-shrink:0;}
+  #controls-label{position:static;min-height:44px;display:flex;align-items:center;font-size:12px;margin-left:auto;}
+  #controls-label svg{width:18px;height:18px;}
+  #mode-select{gap:10px;margin-top:0;max-width:100%;}
+  .mode-btn{min-width:0;padding:16px;gap:6px;}
+  .mode-btn span{font-size:14px;}
+  .mode-btn small{font-size:11px;}
+  #ov{gap:14px;}
+  #ov h2{font-size:38px;}
+  #online-modal-box,#controls-modal-box,#name-modal-box{padding:18px;width:100%;}
+  #online-modal-box h3{font-size:20px;margin-bottom:12px;}
+  .online-panel{padding:12px;}
+  #join-input-box,#room-code-display{flex-wrap:wrap;}
+  #join-code{max-width:100%;min-width:0;}
+  #room-code{font-size:24px;padding:10px;}
+  #controls-modal-box .ctrl-row{gap:12px;font-size:12px;}
+  input{font-size:16px!important;}
 }
-/* Mobile - Portrait (force rotate) */
-@media (max-width:900px) and (orientation:portrait){
-  #app{display:none !important;}
-  #rotate-overlay{display:flex !important;}
+#rotate-overlay{display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:24px;}
+#rotate-overlay .rotate-icon{font-size:54px;}
+#rotate-overlay p{max-width:280px;line-height:1.6;}
+@media (max-width:1000px) and (orientation:portrait){
+  #app,#ov,#online-modal,#name-modal{visibility:hidden;}
+  #rotate-overlay{display:flex;}
 }
-#rotate-overlay{
-  display:none;
-  position:fixed;inset:0;
-  background:var(--bg);
-  z-index:9999;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:20px;
-  color:var(--text);
-  font-family:'Geist',sans-serif;
+.skill-gem .gem-label{display:block;font:600 8px 'Geist',sans-serif;color:var(--text-secondary);white-space:nowrap;}
+#left-panel{z-index:2;max-height:calc(100% - 8px);overflow-y:auto;}
+.skill-gem{height:62px;flex-shrink:0;}
+.skill-gem svg{height:48px;}
+.skill-gem.used .gem-label{color:var(--dim);}
+.skill-gem.armed .gem-label{color:var(--gold-light);}
+#skill-status{font-size:9px;color:var(--gold-light);text-align:center;max-width:94px;line-height:1.35;grid-column:1/-1;}
+@media (max-width:1000px), (pointer:coarse){
+  #left-panel{grid-template-columns:repeat(2,44px);gap:4px;}
+  .skill-gem{width:44px;height:46px;}
+  .skill-gem svg{height:33px;}
 }
-#rotate-overlay .rotate-icon{
-  font-size:64px;
-  animation:rotate-phone 2s ease-in-out infinite;
-}
-#rotate-overlay p{
-  font-size:18px;font-weight:600;letter-spacing:1px;color:var(--dim);
-}
-@keyframes rotate-phone{
-  0%,100%{transform:rotate(0deg);}
-  25%{transform:rotate(-90deg);}
-  50%,75%{transform:rotate(-90deg);}
+@media (max-height:420px) and (orientation:landscape){
+  #header{padding:2px 8px;margin-bottom:2px;}
+  #ball-tray-row{padding:2px 5px;margin-top:0;}
+  #bottom-bar{padding:0;}
+  #ov{gap:8px;}
+  #ov h2{font-size:30px;}
 }
 #name-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:200;align-items:center;justify-content:center;}
 #name-modal.active{display:flex;animation:fadeIn .2s ease-out;}
@@ -390,10 +402,7 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
     </linearGradient>
   </defs>
 </svg>
-<div id="rotate-overlay">
-  <div class="rotate-icon">📱</div>
-  <p>Rotate your device to landscape</p>
-</div>
+<div id="rotate-overlay"><div class="rotate-icon">↻</div><h2>Turn to landscape</h2><p>Rotate your phone or widen this window to play. Your match stays here.</p></div>
 <div id="app">
   <div id="header">
     <div class="player-info" id="p1-info">
@@ -434,7 +443,7 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
     <div id="left-panel">
       <div class="label">SKILLS</div>
       <!-- Freeze: Ice Blue Teardrop Gem -->
-      <button class="skill-gem freeze locked" data-skill="freeze" data-name="Freeze">
+      <button class="skill-gem freeze locked" data-skill="freeze" data-name="Freeze" aria-label="Freeze">
         <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
           <defs><linearGradient id="freezeGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b3e5fc"/><stop offset="30%" stop-color="#4fc3f7"/><stop offset="70%" stop-color="#0288d1"/><stop offset="100%" stop-color="#01579b"/></linearGradient></defs>
           <path class="frame-shadow" d="M24 54c-12 0-20-18-20-30C4 12 12 4 24 4s20 8 20 20c0 12-8 30-20 30z" fill="#5d4e37"/>
@@ -444,9 +453,9 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
           <path class="gem-highlight" d="M18 18c4-4 12-4 16 0-3-6-8-6-12-4s-6 2-4 4z" fill="#fff" opacity="0.7"/>
           <ellipse class="gem-highlight" cx="18" cy="20" rx="4" ry="3" fill="#fff" opacity="0.5"/>
         </svg>
-      </button>
+      <span class="gem-label">Freeze</span></button>
       <!-- Laser: Orange Hexagon Gem -->
-      <button class="skill-gem laser locked" data-skill="laser" data-name="Laser Aim">
+      <button class="skill-gem laser locked" data-skill="laser" data-name="Laser Aim" aria-label="Laser Aim">
         <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
           <defs><linearGradient id="laserGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffe0b2"/><stop offset="30%" stop-color="#ffb74d"/><stop offset="70%" stop-color="#f57c00"/><stop offset="100%" stop-color="#e65100"/></linearGradient></defs>
           <polygon class="frame-shadow" points="24,2 44,14 44,42 24,54 4,42 4,14" fill="#5d4e37"/>
@@ -456,9 +465,9 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
           <polygon class="gem-highlight" points="24,12 34,19 34,24 24,17 14,24 14,19" fill="#fff" opacity="0.6"/>
           <ellipse class="gem-highlight" cx="18" cy="22" rx="4" ry="3" fill="#fff" opacity="0.4"/>
         </svg>
-      </button>
+      <span class="gem-label">Laser Aim</span></button>
       <!-- Rewind: Purple Diamond Gem -->
-      <button class="skill-gem rewind locked" data-skill="rewind" data-name="Rewind">
+      <button class="skill-gem rewind locked" data-skill="rewind" data-name="Rewind" aria-label="Rewind">
         <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
           <defs><linearGradient id="rewindGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e1bee7"/><stop offset="30%" stop-color="#ba68c8"/><stop offset="70%" stop-color="#8e24aa"/><stop offset="100%" stop-color="#4a148c"/></linearGradient></defs>
           <polygon class="frame-shadow" points="24,2 46,28 24,54 2,28" fill="#5d4e37"/>
@@ -468,9 +477,9 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
           <polygon class="gem-highlight" points="24,12 35,27 24,18 13,27" fill="#fff" opacity="0.6"/>
           <ellipse class="gem-highlight" cx="18" cy="24" rx="4" ry="3" fill="#fff" opacity="0.4"/>
         </svg>
-      </button>
+      <span class="gem-label">Rewind</span></button>
       <!-- Time Warp: Teal Oval Gem -->
-      <button class="skill-gem timewarp locked" data-skill="timewarp" data-name="Time Warp">
+      <button class="skill-gem timewarp locked" data-skill="timewarp" data-name="Time Warp" aria-label="Time Warp">
         <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
           <defs><linearGradient id="timewarpGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b2dfdb"/><stop offset="30%" stop-color="#4db6ac"/><stop offset="70%" stop-color="#00897b"/><stop offset="100%" stop-color="#004d40"/></linearGradient></defs>
           <ellipse class="frame-shadow" cx="24" cy="28" rx="22" ry="26" fill="#5d4e37"/>
@@ -480,9 +489,9 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
           <ellipse class="gem-highlight" cx="19" cy="20" rx="6" ry="5" fill="#fff" opacity="0.6"/>
           <ellipse class="gem-highlight" cx="16" cy="22" rx="3" ry="2" fill="#fff" opacity="0.4"/>
         </svg>
-      </button>
+      <span class="gem-label">Time Warp</span></button>
       <!-- Ghost: Silver Shield Gem -->
-      <button class="skill-gem ghost locked" data-skill="ghost" data-name="Ghost Ball">
+      <button class="skill-gem ghost locked" data-skill="ghost" data-name="Ghost Ball" aria-label="Ghost Ball">
         <svg viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">
           <defs><linearGradient id="ghostGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#eceff1"/><stop offset="30%" stop-color="#90a4ae"/><stop offset="70%" stop-color="#546e7a"/><stop offset="100%" stop-color="#263238"/></linearGradient></defs>
           <path class="frame-shadow" d="M24 2L44 12V34C44 42 36 52 24 54C12 52 4 42 4 34V12L24 2z" fill="#5d4e37"/>
@@ -492,7 +501,8 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
           <path class="gem-highlight" d="M24 12L34 18V22C28 19 24 15 24 15C24 15 20 19 14 22V18L24 12z" fill="#fff" opacity="0.6"/>
           <ellipse class="gem-highlight" cx="18" cy="22" rx="4" ry="3" fill="#fff" opacity="0.4"/>
         </svg>
-      </button>
+      <span class="gem-label">Ghost Ball</span></button>
+      <div id="skill-status" role="status" aria-live="polite">One use per gem</div>
     </div>
 
     <div id="table-container">
@@ -503,6 +513,7 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
     <div id="right-panel">
       <div id="power-meter"></div>
       <div id="power-value">0%</div>
+      <button id="mobile-shot" aria-label="Hold to charge, release to shoot">Hold to shoot</button>
     </div>
   </div>
 
@@ -521,8 +532,11 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
     <div id="help-tabs">
       <button class="help-tab active" data-tab="controls">Controls</button>
       <button class="help-tab" data-tab="skills">Skills</button>
+      <button class="help-tab" data-tab="rules">Rules</button>
     </div>
     <div id="help-controls" class="help-panel active">
+      <div class="ctrl-row"><span class="ctrl-key">Touch & drag</span><span class="ctrl-desc">Aim from behind the cue ball</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Hold to shoot</span><span class="ctrl-desc">Hold the gold button for power; release to shoot</span></div>
       <div class="ctrl-row"><span class="ctrl-key">Mouse Move</span><span class="ctrl-desc">Aim the cue stick</span></div>
       <div class="ctrl-row"><span class="ctrl-key">Hold Click</span><span class="ctrl-desc">Charge shot power</span></div>
       <div class="ctrl-row"><span class="ctrl-key">Release Click</span><span class="ctrl-desc">Take the shot</span></div>
@@ -536,8 +550,8 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
     </div>
     <div id="help-skills" class="help-panel">
       <div style="background:rgba(228,184,77,0.15);padding:10px 14px;border-radius:8px;margin-bottom:12px;border:1px solid rgba(228,184,77,0.3);">
-        <div style="font-size:13px;color:var(--gold);font-weight:700;margin-bottom:4px;">How to Earn Skills</div>
-        <div style="font-size:11px;color:var(--text-secondary);">Pot 2 of your balls legally to unlock one skill gem. Skills unlock in order from top to bottom.</div>
+        <div style="font-size:13px;color:var(--gold);font-weight:700;margin-bottom:4px;">Skill Rules</div>
+        <div style="font-size:11px;color:var(--text-secondary);">All five gems start ready. Each player gets one use of each gem per match. Tap a gem to arm it; tap again to cancel. Only one gem can be armed per shot.</div>
       </div>
       <div class="skill-help-row">
         <div class="skill-gem-mini" style="background:linear-gradient(135deg,#4fc3f7,#01579b);"></div>
@@ -559,7 +573,10 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
         <div class="skill-gem-mini" style="background:linear-gradient(135deg,#90a4ae,#263238);"></div>
         <div class="skill-help-text"><strong style="color:#90a4ae;">Ghost Ball</strong><span>Cue ball phases through first ball touched</span></div>
       </div>
-      <div style="margin-top:12px;font-size:11px;color:var(--dim);text-align:center;">Click an unlocked gem to arm it, then take your shot. Each skill can only be used once per game.</div>
+      <div style="margin-top:12px;font-size:11px;color:var(--dim);text-align:center;">A gem is spent when you shoot, even on a foul. Normal pool rules still apply. Rewind must be armed before shooting; use Replay or Z after the balls stop, before the next shot. Finished games cannot be rewound.</div>
+    </div>
+    <div id="help-rules" class="help-panel">
+      <p style="font-size:13px;line-height:1.7">The first legal pot assigns solids or stripes. Pot your group to keep your turn; a miss passes play. Hit your own group first, then the 8-ball after clearing your group. Missing every ball, hitting the wrong group first, or scratching gives your opponent ball in hand. Potting the 8-ball early or scratching with it loses the game.<br><br>Skills: Freeze stops the cue ball after contact. Laser Aim extends the guide. Time Warp slows the shot. Ghost passes through the first ball (that contact still counts for first-hit rules). Arm Rewind before a shot, then use Replay or Z to undo it before the next shot. Each gem is single-use per player; fouls still count.</p>
     </div>
     <button id="controls-close">Got it!</button>
   </div>
@@ -662,8 +679,7 @@ html,body{width:100%;height:100%;background:linear-gradient(145deg,var(--bg) 0%,
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
-// Force landscape orientation
-try { screen.orientation.lock('landscape').catch(()=>{}); } catch(e){}
+// Both portrait and landscape are supported.
 const BALL_COLORS=['#d4a017','#1a4acc','#cc2222','#7a1aaa','#ff6600','#1a8a2a','#8a2020'];
 const TW=880,TH=440,CUSHION=36,RAIL=18;
 const TOTAL_W=TW+CUSHION*2+RAIL*2, TOTAL_H=TH+CUSHION*2+RAIL*2;
@@ -682,9 +698,11 @@ aimCursorImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 
 function resize(){
   const container=document.getElementById('game-area');
-  const maxW=container.clientWidth-160;
+  const compact=matchMedia('(max-width:1000px), (pointer:coarse)').matches;
+
+  const maxW=container.clientWidth-(compact?184:180);
   const maxH=container.clientHeight-20;
-  // The game container is hidden in portrait mode; never create negative radii.
+  // Keep sizing valid during orientation and browser-toolbar transitions.
   const s=Math.max(0.01,Math.min(maxW/TOTAL_W,maxH/TOTAL_H)*0.95);
   canvas.width=Math.round(TOTAL_W*s);
   canvas.height=Math.round(TOTAL_H*s);
@@ -698,6 +716,8 @@ function resize(){
   tableCache=null;
 }
 resize();window.addEventListener('resize',resize);
+window.visualViewport?.addEventListener('resize',resize);
+new ResizeObserver(resize).observe(document.getElementById('game-area'));
 const S=()=>parseFloat(canvas.dataset.s);
 const tc=(x,y)=>({x:(RAIL+CUSHION+x)*S(),y:(RAIL+CUSHION+y)*S()});
 const ct=(x,y)=>({x:x/S()-RAIL-CUSHION,y:y/S()-RAIL-CUSHION});
@@ -726,17 +746,15 @@ let peer = null, conn = null;
 let isOnline = false, isHost = false, myPlayerIdx = 0;
 let roomCode = '';
 
-// Skills System - Skills are EARNED during play by potting balls
+// Skills System - Every player starts with one use of each skill
 const SKILL_ORDER = ['freeze', 'laser', 'rewind', 'timewarp', 'ghost'];
 const SKILLS = {
-  freeze: { name: 'Freeze', unlocked: [false, false], used: [false, false] },
-  laser: { name: 'Laser Aim', unlocked: [false, false], used: [false, false] },
-  rewind: { name: 'Rewind', unlocked: [false, false], used: [false, false] },
-  timewarp: { name: 'Time Warp', unlocked: [false, false], used: [false, false] },
-  ghost: { name: 'Ghost Ball', unlocked: [false, false], used: [false, false] }
+  freeze: { name: 'Freeze', unlocked: [true, true], used: [false, false] },
+  laser: { name: 'Laser Aim', unlocked: [true, true], used: [false, false] },
+  rewind: { name: 'Rewind', unlocked: [true, true], used: [false, false] },
+  timewarp: { name: 'Time Warp', unlocked: [true, true], used: [false, false] },
+  ghost: { name: 'Ghost Ball', unlocked: [true, true], used: [false, false] }
 };
-let skillProgress = [0, 0]; // Balls potted toward next skill unlock (per player)
-const BALLS_TO_UNLOCK = 2; // Pot 2 balls to unlock a skill
 let activeSkill = null; // Currently armed skill for next shot
 let rewindState = null; // State snapshot for rewind skill
 let timeWarpActive = false; // Slow-mo active
@@ -841,13 +859,22 @@ function handleNetworkData(data) {
     allPotted = data.allPotted;
     foulMsg = data.foulMsg;
     turnMsg = data.turnMsg;
+    if(data.skillUsed)for(const k of SKILL_ORDER)SKILLS[k].used=data.skillUsed[k];
+    rewindState=data.rewindState||null;
+    playerStreaks=data.playerStreaks||[0,0];freeBall=!!data.freeBall;
+    updateSkillUI();
     updateUI();
     updateBallTrays();
+  } else if(data.type === 'skill') {
+    if(curP!==myPlayerIdx&&phase==='aiming'){activeSkill=SKILLS[data.skill]&&!SKILLS[data.skill].used[curP]?data.skill:null;updateSkillUI();}
+  } else if(data.type === 'rewind') {
+    useRewind(true);
   } else if(data.type === 'aim') {
     aimAngle = data.angle;
   } else if(data.type === 'shoot') {
     aimAngle = data.angle;
     power = data.power;
+    activeSkill=SKILLS[data.skill]&&!SKILLS[data.skill].used[curP]?data.skill:null;
     shoot(true); // fromNetwork = true
   } else if(data.type === 'placeBall') {
     if(cueBall) {
@@ -872,13 +899,14 @@ function syncGameState() {
   sendNetworkData({
     type: 'gameState',
     balls: balls.map(b => ({...b})),
-    phase, curP, groups, openTable, allPotted, foulMsg, turnMsg
+    phase, curP, groups, openTable, allPotted, foulMsg, turnMsg, skillUsed:Object.fromEntries(SKILL_ORDER.map(k=>[k,SKILLS[k].used])), rewindState, playerStreaks, freeBall
   });
 }
 
 function startOnlineGame() {
   isOnline = true;
   gameMode = 'online';
+  resetSkills();
   isAI = [false, false];
 
   document.getElementById('p1-name').textContent = isHost ? 'You' : 'Opponent';
@@ -987,7 +1015,7 @@ function setupGame(){
   turnMsg='Player 1 breaks';
   gameTime=0;
   if(timerInterval)clearInterval(timerInterval);
-  timerInterval=setInterval(()=>{gameTime++;updateTimer();},1000);
+  timerInterval=setInterval(()=>{if(!matchMedia('(max-width:1000px) and (orientation:portrait)').matches){gameTime++;updateTimer();}},1000);
   updateUI();updateBallTrays();
 }
 
@@ -1213,10 +1241,12 @@ function shoot(fromNetwork){
 
   // Send shot data to opponent
   if(isOnline && !fromNetwork) {
-    sendNetworkData({ type: 'shoot', angle: aimAngle, power: power });
+    sendNetworkData({ type: 'shoot', angle: aimAngle, power: power, skill:activeSkill });
   }
 
-  // Activate armed skill before shot
+  // A rewind expires when the next shot begins.
+  rewindState=null;
+  freezeActive=ghostBallActive=laserAimActive=timeWarpActive=false;
   activateSkillForShot();
 
   const pct=power,spd=(pct/100)*MAX_POWER;
@@ -1240,6 +1270,7 @@ const myLeft=()=>{const mg=myGroup();return mg?mg==='solid'?countT('solid'):coun
 const needEight=()=>myGroup()!==null&&myLeft()===0;
 
 function afterShot(){
+  freezeActive=ghostBallActive=laserAimActive=timeWarpActive=false;
   const cuePot=pottedShot.find(b=>b.type==='cue');
   const eightPot=pottedShot.find(b=>b.type==='eight');
   const solPot=pottedShot.filter(b=>b.type==='solid');
@@ -1277,11 +1308,7 @@ function afterShot(){
       if(mg){if((mg==='solid'?solPot:strPot).length>0)keep=true;}
       else if(anyObj.some(b=>groupOf(b)))keep=true;
 
-      // Earn skill progress for legally potting balls
-      const myPotted = mg ? (mg==='solid'?solPot:strPot).length : anyObj.filter(b=>groupOf(b)).length;
-      if(myPotted > 0) {
-        earnSkillProgress(curP, myPotted);
-      }
+
     }
 
     if(foul){
@@ -1339,7 +1366,7 @@ function afterShot(){
   if(timerInterval)clearInterval(timerInterval);
   document.getElementById('ot').textContent=`${winner===0?'Player 1':'CPU'} Wins!`;
   document.getElementById('os').textContent=fR;
-  document.getElementById('bs').textContent='Play Again';
+  document.getElementById('mode-select').style.display='flex';
   document.getElementById('ov').classList.remove('h');
   updateUI();
 }
@@ -1973,13 +2000,36 @@ function handlePointerDown(){
 }
 function handlePointerUp(){if(charging){charging=false;shoot();}}
 
-canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();handlePointerMove(e.clientX-r.left,e.clientY-r.top);});
-canvas.addEventListener('mousedown',handlePointerDown);
-canvas.addEventListener('mouseup',handlePointerUp);
-canvas.addEventListener('mouseleave',handlePointerUp);
-canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0],r=canvas.getBoundingClientRect();handlePointerMove(t.clientX-r.left,t.clientY-r.top);handlePointerDown();},{passive:false});
-canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=canvas.getBoundingClientRect();handlePointerMove(t.clientX-r.left,t.clientY-r.top);},{passive:false});
-canvas.addEventListener('touchend',e=>{e.preventDefault();handlePointerUp();},{passive:false});
+let tablePointer=null;
+function pointerPosition(e){
+  const rect=canvas.getBoundingClientRect();
+  handlePointerMove((e.clientX-rect.left)*canvas.width/rect.width,(e.clientY-rect.top)*canvas.height/rect.height);
+}
+function cancelCharge(){charging=false;power=0;updPow();}
+canvas.addEventListener('pointerdown',e=>{
+  if(tablePointer!==null||!e.isPrimary||e.button!==0)return;
+  tablePointer=e.pointerId;canvas.setPointerCapture(e.pointerId);pointerPosition(e);getAC();
+  if(e.pointerType==='mouse'||phase==='placing'||phase==='rolling')handlePointerDown();
+});
+canvas.addEventListener('pointermove',e=>{
+  if(tablePointer===null&&e.pointerType==='mouse'||e.pointerId===tablePointer)pointerPosition(e);
+});
+canvas.addEventListener('pointerup',e=>{
+  if(e.pointerId!==tablePointer)return;
+  tablePointer=null;handlePointerUp();
+});
+canvas.addEventListener('pointercancel',()=>{tablePointer=null;cancelCharge();});
+canvas.addEventListener('lostpointercapture',()=>{tablePointer=null;});
+const mobileShot=document.getElementById('mobile-shot');
+let shotPointer=null;
+mobileShot.addEventListener('pointerdown',e=>{
+  if(!e.isPrimary||e.button!==0||phase!=='aiming'||isAI[curP]||(isOnline&&curP!==myPlayerIdx))return;
+  e.preventDefault();shotPointer=e.pointerId;mobileShot.setPointerCapture(e.pointerId);handlePointerDown();
+});
+mobileShot.addEventListener('pointerup',e=>{if(e.pointerId===shotPointer){shotPointer=null;handlePointerUp();}});
+mobileShot.addEventListener('pointercancel',()=>{shotPointer=null;cancelCharge();});
+mobileShot.addEventListener('lostpointercapture',()=>{if(shotPointer!==null){shotPointer=null;cancelCharge();}});
+window.addEventListener('blur',cancelCharge);
 
 function chargePwr(){if(!charging)return;power=Math.min(100,power+0.7);updPow();}
 
@@ -2085,6 +2135,7 @@ function skipAction(){
 // Loop
 function loop(){
   requestAnimationFrame(loop);
+  if(matchMedia('(max-width:1000px) and (orientation:portrait)').matches){cancelCharge();return;}
   chargePwr();aiUpdate();
   if(phase==='rolling'){
     rollFrames++;
@@ -2193,7 +2244,7 @@ document.querySelectorAll('.skill-gem').forEach(gem => {
     const skill = gem.dataset.skill;
     if(gem.classList.contains('locked')) return; // Can't use locked skills
     if(gem.classList.contains('used')) return; // Can't use spent skills
-    if(phase !== 'aiming' || isAI[curP]) return; // Only during player's aiming phase
+    if(phase !== 'aiming' || isAI[curP] || (isOnline && curP!==myPlayerIdx)) return; // Only during player's aiming phase
 
     // Toggle armed state
     document.querySelectorAll('.skill-gem').forEach(g => g.classList.remove('armed'));
@@ -2203,15 +2254,16 @@ document.querySelectorAll('.skill-gem').forEach(gem => {
       activeSkill = skill;
       gem.classList.add('armed');
     }
+    updateSkillUI();
+    if(isOnline)sendNetworkData({type:'skill',skill:activeSkill});
   });
 });
 
 function resetSkills() {
   Object.keys(SKILLS).forEach(key => {
-    SKILLS[key].unlocked = [false, false];
+    SKILLS[key].unlocked = [true, true];
     SKILLS[key].used = [false, false];
   });
-  skillProgress = [0, 0];
   activeSkill = null;
   rewindState = null;
   timeWarpActive = false;
@@ -2222,6 +2274,7 @@ function resetSkills() {
 }
 
 function updateSkillUI() {
+  document.getElementById('skill-status').textContent=activeSkill?SKILLS[activeSkill].name+' armed':'One use per gem';
   document.querySelectorAll('.skill-gem').forEach(gem => {
     const skill = gem.dataset.skill;
     const isUnlocked = SKILLS[skill].unlocked[curP];
@@ -2229,46 +2282,16 @@ function updateSkillUI() {
     gem.classList.toggle('locked', !isUnlocked);
     gem.classList.toggle('used', isUsed);
     gem.classList.toggle('armed', activeSkill === skill && isUnlocked && !isUsed);
+    gem.setAttribute('aria-pressed',String(activeSkill===skill));
+    gem.setAttribute('aria-disabled',String(isUsed||!isUnlocked));
+    gem.title=SKILLS[skill].name+(isUsed?' — used':activeSkill===skill?' — armed':' — ready');
   });
-}
-
-function earnSkillProgress(player, ballsCount) {
-  // Add progress toward unlocking next skill
-  skillProgress[player] += ballsCount;
-
-  // Check if enough balls potted to unlock a skill
-  while(skillProgress[player] >= BALLS_TO_UNLOCK) {
-    skillProgress[player] -= BALLS_TO_UNLOCK;
-    unlockNextSkill(player);
-  }
-}
-
-function unlockNextSkill(player) {
-  // Find next locked skill for this player
-  for(const skillKey of SKILL_ORDER) {
-    if(!SKILLS[skillKey].unlocked[player]) {
-      SKILLS[skillKey].unlocked[player] = true;
-
-      // Show unlock animation
-      const gem = document.querySelector(`.skill-gem.${skillKey}`);
-      if(gem && player === curP) {
-        gem.classList.remove('locked');
-        gem.classList.add('just-unlocked');
-        setTimeout(() => gem.classList.remove('just-unlocked'), 600);
-      }
-
-      // Show event notification
-      if(player === curP) {
-        showEvent('SKILL UNLOCKED!', SKILLS[skillKey].name);
-      }
-      return;
-    }
-  }
 }
 
 function activateSkillForShot() {
   if(!activeSkill) return;
   const skill = activeSkill;
+  if(!SKILLS[skill]||SKILLS[skill].used[curP]){activeSkill=null;return;}
 
   // Mark as used for current player
   SKILLS[skill].used[curP] = true;
@@ -2290,7 +2313,7 @@ function activateSkillForShot() {
         openTable: openTable,
         firstHit: firstHit,
         pottedShot: [...pottedShot],
-        phase: phase
+        phase: phase, allPotted:allPotted.map(b=>({...b})), playerStreaks:[...playerStreaks], freeBall, turnMsg, foulMsg
       };
       break;
     case 'timewarp':
@@ -2305,20 +2328,27 @@ function activateSkillForShot() {
   updateSkillUI();
 }
 
-function useRewind() {
-  if(!rewindState) return false;
+function useRewind(fromNetwork=false) {
+  if(!rewindState||!['aiming','placing'].includes(phase)||(isOnline&&!fromNetwork&&myPlayerIdx!==rewindState.curP)) return false;
+  if(isOnline&&!fromNetwork)sendNetworkData({type:'rewind'});
   balls = rewindState.balls.map(b => ({...b}));
   cueBall = balls.find(b => b.num === 0);
   curP = rewindState.curP;
   groups = [...rewindState.groups];
   openTable = rewindState.openTable;
-  firstHit = rewindState.firstHit;
-  pottedShot = [...rewindState.pottedShot];
+  firstHit=null;pottedShot=[];
+  allPotted=rewindState.allPotted.map(b=>({...b}));
+  playerStreaks=[...rewindState.playerStreaks];
+  freeBall=rewindState.freeBall;turnMsg=rewindState.turnMsg;foulMsg=rewindState.foulMsg;
+  activeSkill=null;freezeActive=ghostBallActive=laserAimActive=timeWarpActive=false;
+  aiThinking=false;aiState='idle';replayPlaying=false;replayFrames=[];
   phase = 'aiming';
   rewindState = null;
   power = 0;
   charging = false;
-  updateSkillUI();
+  updateSkillUI();updateUI();updateBallTrays();updPow();
+  playerStreaks.forEach((n,i)=>showStreak(n,i));
+  if(isOnline&&isHost)syncGameState();
   return true;
 }
 document.getElementById('breplay').addEventListener('click',function(){
