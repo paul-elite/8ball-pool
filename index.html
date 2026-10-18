@@ -721,6 +721,7 @@ const TOTAL_W=TW+IN*2, TOTAL_H=TH+IN*2;
 const BR=12, POCKET_R=22, MAX_POWER=1148, CUE_LEN=300;
 const BAULK_X=TW*0.22, D_RADIUS=TH*0.2;
 const FOOT={x:TW*0.73,y:TH*0.5};
+const FLOOR_X=150,FLOOR_Y=118;   // floor space around the table, in table units
 const POCKETS=[{x:0,y:0},{x:TW/2,y:-4},{x:TW,y:0},{x:0,y:TH},{x:TW/2,y:TH+4},{x:TW,y:TH}];
 
 // One light for everything: an overhead lamp slightly up-left of centre.
@@ -744,8 +745,8 @@ function resize(){
   canvas.style.width=W+'px';canvas.style.height=H+'px';
   canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
   DPR=dpr;
-  const side=W<760?64:150;
-  const sc=Math.max(0.2,Math.min((W-side*2)/TOTAL_W,(H-12)/TOTAL_H));
+  // zoomed out so there is floor around the table for the players to walk on
+  const sc=Math.max(0.15,Math.min(W/(TOTAL_W+2*FLOOR_X),H/(TOTAL_H+2*FLOOR_Y)));
   SCALE=sc*dpr;
   OX=Math.round((canvas.width-TOTAL_W*SCALE)/2);
   OY=Math.round((canvas.height-TOTAL_H*SCALE)/2);
@@ -1102,6 +1103,7 @@ function setupGame(){
   for(let i=0;i<7;i++)balls.push(mkBall('solid',i+1,i,false,0,0));
   for(let i=0;i<7;i++)balls.push(mkBall('stripe',i+9,i,true,0,0));
   rackBalls();
+  lastStance=null;
   phase='aiming';curP=0;aimAngle=Math.PI;power=0;charging=false;setSpin(0,0);
   resetBoosts();
   refreshTurnMsg();
@@ -1773,9 +1775,34 @@ function drawCueStick(g,cx,cy,ang,tip,len){
 }
 
 // ── People ──
-const STANCE={bridge:[62,3],head:[176,-2],ls:[158,22],rs:[214,-26],le:[110,17],re:[246,-31]};
-let watchers=[{x:-110,y:TH*.45,a:0,spot:0,alpha:0},{x:TW+110,y:TH*.55,a:Math.PI,spot:1,alpha:0}];
-const SPOTS=[{x:-80,y:TH*.42},{x:TW+80,y:TH*.58},{x:-80,y:TH*.72},{x:TW+80,y:TH*.28}];
+// Players live on a walkway loop just outside the rails and walk around it.
+const WALK=48;
+const PX0=-IN-WALK,PX1=TW+IN+WALK,PY0=-IN-WALK,PY1=TH+IN+WALK,PW=PX1-PX0,PH=PY1-PY0,PER=2*(PW+PH);
+function perimPt(s){
+  s=((s%PER)+PER)%PER;
+  if(s<PW)return{x:PX0+s,y:PY0};s-=PW;
+  if(s<PH)return{x:PX1,y:PY0+s};s-=PH;
+  if(s<PW)return{x:PX1-s,y:PY1};s-=PW;
+  return{x:PX0,y:PY1-s};
+}
+function perimS(x,y){
+  const cx=Math.max(PX0,Math.min(PX1,x)),cy=Math.max(PY0,Math.min(PY1,y));
+  const dT=Math.abs(cy-PY0),dB=Math.abs(PY1-cy),dL=Math.abs(cx-PX0),dR=Math.abs(PX1-cx),m=Math.min(dT,dB,dL,dR);
+  if(m===dT)return cx-PX0;
+  if(m===dR)return PW+(cy-PY0);
+  if(m===dB)return PW+PH+(PX1-cx);
+  return 2*PW+PH+(PY1-cy);
+}
+const sDiff=(a,b)=>{let d=((b-a)%PER+PER)%PER;if(d>PER/2)d-=PER;return d;};
+let people=[{s:perimS(-999,TH*.5),a:0,posed:false,walk:0,moving:false},{s:perimS(TW+999,TH*.5),a:Math.PI,posed:false,walk:0,moving:false}];
+// Where the shooter stands: at the rail where the cue line leaves the table, never on the cloth
+function stanceFor(bx,by,ang){
+  const dx=Math.cos(ang),dy=Math.sin(ang);
+  const tx=dx>1e-4?(TW+IN-bx)/dx:dx<-1e-4?(-IN-bx)/dx:Infinity;
+  const ty=dy>1e-4?(TH+IN-by)/dy:dy<-1e-4?(-IN-by)/dy:Infinity;
+  const D=Math.max(175,Math.min(tx,ty)+16);
+  return{D,x:bx+dx*D,y:by+dy*D};
+}
 function limb(g,a,b,c,kit,w){
   const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
   g.lineCap='round';g.lineJoin='round';
@@ -1807,83 +1834,83 @@ function torso(g,ls,rs,kit,back,lx,ly){
   g.fillStyle=sh;g.beginPath();g.ellipse(mx,my,Math.hypot(rs[0]-ls[0],rs[1]-ls[1])/2+26,30,ang,0,Math.PI*2);g.save();g.clip();
   g.beginPath();g.ellipse(mx,my,Math.hypot(rs[0]-ls[0],rs[1]-ls[1])/2+12,20,ang,0,Math.PI*2);g.fill();g.restore();
 }
-function drawShooter(g,cx,cy,ang,pull,kit,showCue){
+function drawShooter(g,cx,cy,ang,pull,kit,D){
   const L=lightDir(cx,cy),ca=Math.cos(-ang),sa=Math.sin(-ang);
   const lx=-(L.x*ca-L.y*sa),ly=-(L.x*sa+L.y*ca);                      // lamp direction in stance space
-  const st=STANCE,tip=BR+4+pull;
-  const backHand=[tip+212,0],re=[st.re[0]+pull*.7,st.re[1]];
+  const tip=BR+4+pull;
+  const hd=[D-14,-2],ls=[D-32,22],rs=[D+24,-26];
+  const bridge=[Math.max(84,D-150),3],le=[(ls[0]+Math.max(84,D-150))/2,16];
+  const backHand=[D+38+pull,0],re=[D+56+pull*.7,-31];
   g.save();g.translate(cx,cy);g.rotate(ang);
   // silhouette pass casts the shadow
   g.save();g.shadowColor='rgba(0,0,0,.38)';g.shadowBlur=14*SCALE;g.shadowOffsetX=L.x*18*SCALE;g.shadowOffsetY=L.y*18*SCALE;
   g.fillStyle=kit.shirt;g.strokeStyle=kit.shirt;g.lineCap='round';g.lineJoin='round';
-  g.lineWidth=28;g.beginPath();g.moveTo(st.ls[0],st.ls[1]);g.lineTo(st.rs[0],st.rs[1]);g.stroke();
-  g.lineWidth=11;g.beginPath();g.moveTo(st.ls[0],st.ls[1]);g.lineTo(st.le[0],st.le[1]);g.lineTo(st.bridge[0],st.bridge[1]);g.stroke();
-  g.beginPath();g.moveTo(st.rs[0],st.rs[1]);g.lineTo(re[0],re[1]);g.lineTo(backHand[0],backHand[1]);g.stroke();
-  g.beginPath();g.arc(st.head[0],st.head[1],17,0,Math.PI*2);g.fill();
+  g.lineWidth=28;g.beginPath();g.moveTo(ls[0],ls[1]);g.lineTo(rs[0],rs[1]);g.stroke();
+  g.lineWidth=11;g.beginPath();g.moveTo(ls[0],ls[1]);g.lineTo(le[0],le[1]);g.lineTo(bridge[0],bridge[1]);g.stroke();
+  g.beginPath();g.moveTo(rs[0],rs[1]);g.lineTo(re[0],re[1]);g.lineTo(backHand[0],backHand[1]);g.stroke();
+  g.beginPath();g.arc(hd[0],hd[1],17,0,Math.PI*2);g.fill();
   g.restore();
-  limb(g,st.ls,st.le,st.bridge,kit,12);
-  hand(g,st.bridge,kit,6);
+  limb(g,ls,le,bridge,kit,12);
+  hand(g,bridge,kit,6);
   g.restore();
-  if(showCue)drawCueStick(g,cx,cy,ang,tip);
+  drawCueStick(g,cx,cy,ang,tip,D+110-(BR+4));
   g.save();g.translate(cx,cy);g.rotate(ang);
-  torso(g,st.ls,st.rs,kit,[10,-2],lx,ly);
-  limb(g,st.rs,re,backHand,kit,12);
+  torso(g,ls,rs,kit,[10,-2],lx,ly);
+  limb(g,rs,re,backHand,kit,12);
   hand(g,backHand,kit,6.5);
-  head(g,st.head,[-1,0],kit,lx,ly);
+  head(g,hd,[-1,0],kit,lx,ly);
   g.restore();
 }
-function drawStanding(g,w,kit,t){
-  const L=lightDir(w.x,w.y),ca=Math.cos(-w.a),sa=Math.sin(-w.a);
-  const lx=-(L.x*ca-L.y*sa),ly=-(L.x*sa+L.y*ca),br=1+Math.sin(t/38)*.015;
-  g.save();g.globalAlpha=w.alpha;
-  // the cue rests against the shoulder, tip up and away
-  const hR=[16,30];
-  const wx=w.x+Math.cos(w.a)*hR[0]-Math.sin(w.a)*hR[1],wy=w.y+Math.sin(w.a)*hR[0]+Math.cos(w.a)*hR[1];
-  drawCueStick(g,wx,wy,w.a+Math.PI*.82,-8,130);
-  g.translate(w.x,w.y);g.rotate(w.a);g.scale(br,br);
+function drawWalker(g,pp,kit){
+  const pos=perimPt(pp.s),L=lightDir(pos.x,pos.y),ca=Math.cos(-pp.a),sa=Math.sin(-pp.a);
+  const lx=-(L.x*ca-L.y*sa),ly=-(L.x*sa+L.y*ca);
+  const sw=pp.moving?Math.sin(pp.walk)*9:0,bob=pp.moving?1+Math.abs(Math.sin(pp.walk))*.03:1+Math.sin(tick/38)*.015;
+  g.save();
+  // the cue is carried at the side, angled back
+  const hR=[16+sw*.6,30],ex=Math.cos(pp.a),ey=Math.sin(pp.a);
+  drawCueStick(g,pos.x+ex*hR[0]-ey*hR[1],pos.y+ey*hR[0]+ex*hR[1],pp.a+Math.PI*.82,-8,130);
+  g.translate(pos.x,pos.y);g.rotate(pp.a);g.scale(bob,bob);
   g.save();g.shadowColor='rgba(0,0,0,.38)';g.shadowBlur=14*SCALE;
   g.shadowOffsetX=L.x*18*SCALE;g.shadowOffsetY=L.y*18*SCALE;
   g.fillStyle=kit.shirt;g.beginPath();g.ellipse(-4,0,20,38,0,0,Math.PI*2);g.fill();
   g.beginPath();g.arc(2,0,17,0,Math.PI*2);g.fill();
   g.restore();
-  limb(g,[0,-28],[8,-36],[18,-30],kit,12);
-  limb(g,[0,28],[8,36],hR,kit,12);
-  hand(g,[18,-30],kit,6);hand(g,hR,kit,6.5);
+  limb(g,[0,-28],[8-sw*.5,-36],[18-sw,-30],kit,12);
+  limb(g,[0,28],[8+sw*.5,36],hR,kit,12);
+  hand(g,[18-sw,-30],kit,6);hand(g,hR,kit,6.5);
   torso(g,[0,-27],[0,27],kit,[-5,0],lx,ly);
   head(g,[3,0],[1,0],kit,lx,ly);
   g.restore();
 }
 function drawPeople(g){
   if(!cueBall)return;
-  const shooting=(phase==='aiming'&&cueBall.onTable)||phase==='rolling'||phase==='done';
-  let body=null;
-  if(shooting){
-    const st=phase==='aiming'?{x:cueBall.x,y:cueBall.y,ang:aimAngle}:lastStance;
-    if(st)body={x:st.x+Math.cos(st.ang)*190,y:st.y+Math.sin(st.ang)*190};
-  }
-  // the player not at the table stands at the rail spot furthest from the shooter
-  [0,1].forEach(p=>{
-    const w=watchers[p];
-    const standing=!shooting||p!==curP;
-    if(!standing){w.alpha=Math.max(0,w.alpha-.12);return;}
-    let best=w.spot,bd=-1;
-    const ref=body||(phase==='placing'&&p!==curP?cueBall:null);
-    SPOTS.forEach((s,i)=>{
-      if(!shooting&&i===watchers[1-p].spot&&watchers[1-p].alpha>.5)return;
-      const d=ref?Math.hypot(s.x-ref.x,s.y-ref.y):(i===p?1:0);
-      if(d>bd+(i===w.spot?0:60)){bd=d;best=i;}
-    });
-    if(phase==='placing'&&p===curP){let nd=1e9;SPOTS.forEach((s,i)=>{const d=Math.hypot(s.x-cueBall.x,s.y-cueBall.y);if(i!==watchers[1-p].spot&&d<nd){nd=d;best=i;}});}
-    w.spot=best;
-    const tx=SPOTS[best].x,ty=SPOTS[best].y;
-    w.x+=(tx-w.x)*.08;w.y+=(ty-w.y)*.08;
-    const ta=Math.atan2(TH/2-w.y,TW/2-w.x);let da=ta-w.a;while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;w.a+=da*.1;
-    w.alpha=Math.min(1,w.alpha+.08);
-    drawStanding(g,w,KITS[p],tick+p*50);
-  });
-  if(shooting){
-    if(phase==='aiming')drawShooter(g,cueBall.x,cueBall.y,aimAngle,(power/100)*55,KITS[curP],true);
-    else if(lastStance)drawShooter(g,lastStance.x,lastStance.y,lastStance.ang,-6,KITS[lastStance.p],true);
+  const shooting=(phase==='aiming'&&cueBall.onTable)||((phase==='rolling'||phase==='done')&&lastStance);
+  const st=phase==='aiming'?{x:cueBall.x,y:cueBall.y,ang:aimAngle,p:curP}:lastStance;
+  const stance=shooting?stanceFor(st.x,st.y,st.ang):null;
+  const shooterP=shooting?st.p:-1;
+  const order=shooterP===0?[1,0]:[0,1];                 // shooter drawn last (on top)
+  for(const p of order){
+    const pp=people[p];let target;
+    if(p===shooterP)target=perimS(stance.x,stance.y);
+    else if(shooting)target=perimS(stance.x,stance.y)+PER/2;           // the other player waits opposite
+    else if(phase==='placing')target=p===curP?perimS(cueBall.x,cueBall.y):perimS(cueBall.x,cueBall.y)+PER/2;
+    else target=p===0?perimS(-999,TH*.5):perimS(TW+999,TH*.5);
+    const d=sDiff(pp.s,target);
+    if(p===shooterP&&pp.posed&&Math.abs(d)<260){pp.s=target;pp.moving=false;}
+    else{
+      pp.posed=false;
+      const step=Math.sign(d)*Math.min(Math.abs(d),p===shooterP?20:9);
+      pp.s+=step;pp.moving=Math.abs(step)>0.5;
+      if(pp.moving){pp.walk+=0.32;const a=perimPt(pp.s),b=perimPt(pp.s+Math.sign(d)*4);var face=Math.atan2(b.y-a.y,b.x-a.x);}
+      else{const a=perimPt(pp.s);var face=Math.atan2(TH/2-a.y,TW/2-a.x);}
+      let da=face-pp.a;while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;pp.a+=da*.18;
+      if(p===shooterP&&Math.abs(sDiff(pp.s,target))<30)pp.posed=true;
+    }
+    if(p===shooterP&&pp.posed){
+      const pull=phase==='aiming'?(power/100)*55:-6;
+      drawShooter(g,st.x,st.y,st.ang,pull,KITS[p],stance.D);
+      pp.a=st.ang+Math.PI;
+    }else drawWalker(g,pp,KITS[p]);
   }
 }
 
